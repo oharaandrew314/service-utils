@@ -1,0 +1,56 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.4.32'
+    id 'maven-publish'
+}
+
+ext {
+    ver = [
+            javalin: '3.13.0',
+            aws: '1.11.817'
+    ]
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib"
+    compileOnly group: 'log4j', name: 'log4j', version: '1.2.17'
+
+    // javalin
+    compileOnly group: 'io.javalin', name: 'javalin', version: ver.javalin
+    compileOnly group: 'io.javalin', name: 'javalin-openapi', version: ver.javalin
+
+    // aws
+    compileOnly group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: ver.aws
+
+    // jdbc
+    compileOnly group: 'mysql', name: 'mysql-connector-java', version: '8.0.20'
+
+    // http4k
+    compileOnly platform("org.http4k:http4k-bom:4.7.1.0")
+    compileOnly "org.http4k:http4k-contract"
+    compileOnly "org.http4k:http4k-format-jackson"
+    compileOnly 'org.webjars.npm:redoc:2.0.0-rc.53'  // TODO download client-side instead
+    compileOnly  'org.webjars:swagger-ui:3.47.1'   // TODO download client-side instead
+
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
+    testImplementation 'org.assertj:assertj-core:3.13.2'
+    testImplementation 'com.github.javalin:javalin-test:0.4.0'
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.kotlin
+            artifact sourcesJar
+        }
+    }
+}
