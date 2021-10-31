@@ -21,5 +21,5 @@ object IdGenerator {
 
     fun nextNumeric(length: Int) = next(length, numeric).toBigInteger()
 
-    fun nextHex(length: Int) = next(length, hex).toLowerCase()
+    fun nextHex(length: Int) = next(length, hex).lowercase()
 }

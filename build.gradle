@@ -45,10 +45,15 @@ configurations { // don't want to bundle dependencies in library, but they are n
     testImplementation.extendsFrom compileOnly
 }
 
+allprojects {
+    jacoco {
+        toolVersion = "0.8.7"
+    }
+}
+
 jacocoTestReport {
     reports {
         xml.enabled true
-        xml.destination file("${buildDir}/reports/jacoco/report.xml")
     }
 }
 
