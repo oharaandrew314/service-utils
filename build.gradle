@@ -1,6 +1,7 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.5.31'
     id 'maven-publish'
+    id 'jacoco'
 }
 
 ext {
@@ -42,6 +43,13 @@ dependencies {
 
 configurations { // don't want to bundle dependencies in library, but they are needed in tests
     testImplementation.extendsFrom compileOnly
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        xml.destination file("${buildDir}/reports/jacoco/report.xml")
+    }
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {

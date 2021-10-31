@@ -38,13 +38,6 @@ class JdbcUtilsTest {
         }
     }
 
-//    companion object {
-//        @BeforeAll @JvmStatic
-//        fun createTables() {
-//            executeScript("create-tables.sql")
-//        }
-//    }
-
     @BeforeEach
     fun createTables() {
         executeScript("create-tables.sql")
