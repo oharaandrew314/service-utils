@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS cats (
+    id IDENTITY PRIMARY KEY NOT NULL,
+    name VARCHAR,
+    lives INT,
+    born TIMESTAMP,
+    trills BOOLEAN
+)
