@@ -11,5 +11,14 @@ Utilities for my kotlin microservices
 
 Follow the instructions on Jitpack.
 
+## Utilities
+
+- Config Loader
+- Id Generator
+- Http4k Contract UI
+- JDBC
+- DynamoDB V1
+- Javalin Filters
+
 ## TODO
 - sqs runner
