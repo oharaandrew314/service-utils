@@ -1,0 +1,1 @@
+{"info":{"title":"API","version":"v1.0"},"tags":[],"paths":{"/users/{user_id}":{"get":{"summary":"<unknown>","tags":[""],"parameters":[{"schema":{"type":"integer"},"in":"path","name":"user_id","required":true}],"responses":{},"security":[],"operationId":"getUsers_user_id","deprecated":false}}},"components":{"schemas":{},"securitySchemes":{}},"openapi":"3.0.0"}

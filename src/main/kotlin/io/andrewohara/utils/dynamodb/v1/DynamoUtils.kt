@@ -1,4 +1,4 @@
-package io.andrewohara.utils.dynamodb
+package io.andrewohara.utils.dynamodb.v1
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
