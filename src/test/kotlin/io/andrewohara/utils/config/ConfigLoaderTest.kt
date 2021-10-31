@@ -1,7 +1,5 @@
 package io.andrewohara.utils.config
 
-import io.andrewohara.utils.config.ConfigLoader.Companion.properties
-import io.andrewohara.utils.config.ConfigLoader.Companion.string
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
