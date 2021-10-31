@@ -8,6 +8,7 @@ import io.kotest.matchers.shouldBe
 import org.http4k.core.*
 import org.http4k.routing.bind
 import org.http4k.routing.routes
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import java.lang.IllegalArgumentException
 import java.nio.file.Files
@@ -30,58 +31,67 @@ data class Config(
 
 class ConfigLoaderTest {
 
+    private val files = mutableListOf<Path>()
+
+    private fun createFile(text: String): Path {
+        return Files.createTempFile("foo", "txt").also { file ->
+            files.add(file)
+            Files.writeString(file, text)
+        }
+    }
+
+    @AfterEach
+    fun deleteFiles() {
+        files.forEach { it.toFile().delete() }
+    }
+
     @Test
     fun `string from file`() {
-        val file = Files.createTempFile("foo", "txt")
-        try {
-            Files.writeString(file, "foo bar baz")
+        val file = createFile("foo bar baz")
 
-            ConfigLoader.file(file).string()() shouldBe "foo bar baz"
-        } finally {
-            file.toFile().delete()
-        }
+        ConfigLoader.file().string()(file.toString()) shouldBe "foo bar baz"
     }
 
     @Test
     fun `missing file should be null`() {
-        ConfigLoader.file(Path.of("missing.txt"))().shouldBeNull()
+        ConfigLoader.file()("missing.txt").shouldBeNull()
     }
 
     @Test
     fun `jackson json`() {
-        ConfigLoader.resource("config.json").jacksonJson<Config>()() shouldBe Config()
+        ConfigLoader.resource().jacksonJson<Config>()("config.json") shouldBe Config()
     }
 
     @Test
     fun `moshi json`() {
-        ConfigLoader.resource("config.json").moshiJson<Config>()() shouldBe Config()
+        ConfigLoader.resource().moshiJson<Config>()("config.json") shouldBe Config()
     }
 
     @Test
     fun `gson json`() {
-        ConfigLoader.resource("config.json").gsonJson<Config>()() shouldBe Config()
+        ConfigLoader.resource().gsonJson<Config>()("config.json") shouldBe Config()
     }
 
     @Test
     fun `jackson yaml`() {
-        ConfigLoader.resource("config.json").jacksonYaml<Config>()() shouldBe Config()
+        ConfigLoader.resource().jacksonYaml<Config>()("config.json") shouldBe Config()
     }
 
     @Test
     fun `missing resource should be null`() {
-        ConfigLoader.resource("missing.json")().shouldBeNull()
+        ConfigLoader.resource()("missing.json").shouldBeNull()
     }
 
     @Test
     fun `missing resource should throw`() {
         shouldThrow<IllegalArgumentException> {
-            ConfigLoader.resource("missing.json").orThrow()
+            ConfigLoader.resource().orThrow("missing.json")
         }
     }
 
     @Test
     fun `properties from resource`() {
-        ConfigLoader.resource("config.properties").properties()() shouldBe Properties().apply {
+        ConfigLoader.resource().properties()("config.properties") shouldBe Properties().apply {
             put("foo", "bar")
             put("toll", "troll")
         }
@@ -93,7 +103,16 @@ class ConfigLoaderTest {
             "/stuff.txt" bind Method.GET to { Response(Status.OK).body("foo bar baz") }
         )
 
-        ConfigLoader.http4k(Uri.of("http://localhost/stuff.txt"), server).string()() shouldBe "foo bar baz"
+        ConfigLoader.http4k(server).string()("http://localhost/stuff.txt") shouldBe "foo bar baz"
+    }
+
+    @Test
+    fun `http with base uri`() {
+        val server = routes(
+            "/stuff.txt" bind Method.GET to { Response(Status.OK).body("foo bar baz") }
+        )
+
+        ConfigLoader.http4k(Uri.of("http://localhost"), server).string()("stuff.txt") shouldBe "foo bar baz"
     }
 
     @Test
@@ -102,28 +121,29 @@ class ConfigLoaderTest {
             "/stuff.txt" bind Method.GET to { Response(Status.OK).body("foo bar baz") }
         )
 
-        ConfigLoader.http4k(Uri.of("http://localhost/missing.txt"), server).string()().shouldBeNull()
+        ConfigLoader.http4k(server).string()("missing.txt").shouldBeNull()
     }
 
     @Test
     fun `fallback to next in chain`() {
-        (ConfigLoader.resource("missing.txt") or ConfigLoader.resource("text2.txt")).string()() shouldBe "toll trolls"
+        (ConfigLoader.file() or ConfigLoader.resource()).string()("text2.txt") shouldBe "toll trolls"
     }
 
     @Test
     fun `chain hits on first try`() {
-        (ConfigLoader.resource("text.txt") or ConfigLoader.resource("text2.txt")).string()() shouldBe "foo bar baz"
+        val file = createFile("lolcats")
+        (ConfigLoader.file(file.parent) or ConfigLoader.resource()).string()(file.fileName.toString()) shouldBe "lolcats"
     }
 
     @Test
     fun `missing from chain should be null`() {
-        (ConfigLoader.resource("missing.txt") or ConfigLoader.resource("missing2.txt")).string()().shouldBeNull()
+        (ConfigLoader.file() or ConfigLoader.resource()).string()("missing.txt").shouldBeNull()
     }
 
     @Test
     fun `missing from chain should throw`() {
         shouldThrow<IllegalArgumentException> {
-            (ConfigLoader.resource("missing.txt") or ConfigLoader.resource("missing2.txt")).string().orThrow()
+            (ConfigLoader.file() or ConfigLoader.resource()).string().orThrow("missing.txt")
         }
     }
 }
