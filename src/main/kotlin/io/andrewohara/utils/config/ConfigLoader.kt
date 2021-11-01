@@ -8,7 +8,6 @@ import java.util.*
 
 fun interface ConfigLoader<T>: (String) -> T? {
     infix fun or(fallback: ConfigLoader<T>) = ConfigLoader { name -> this(name) ?: fallback(name) }
-    fun get(name: String) = this(name)
     fun orThrow(name: String): T = this(name) ?: throw IllegalArgumentException("Could not find resource: $name")
 
     companion object
@@ -39,4 +38,8 @@ fun ConfigLoader<ByteArray>.properties() = ConfigLoader { name ->
 
 fun ConfigLoader<ByteArray>.string(charset: Charset = Charsets.UTF_8) = ConfigLoader { name ->
     this(name)?.toString(charset)
+}
+
+fun ConfigLoader.Companion.env() = ConfigLoader { name ->
+    System.getenv(name)
 }

@@ -8,6 +8,7 @@ import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
+import java.io.IOException
 import java.lang.IllegalArgumentException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -30,6 +31,10 @@ data class Config(
 class ConfigLoaderTest {
 
     private val files = mutableListOf<Path>()
+    private val server = routes(
+        "/stuff.txt" bind Method.GET to { Response(Status.OK).body("foo bar baz") },
+        "/error" bind Method.GET to { Response(Status.INTERNAL_SERVER_ERROR) }
+    )
 
     private fun createFile(text: String): Path {
         return Files.createTempFile("foo", "txt").also { file ->
@@ -48,6 +53,13 @@ class ConfigLoaderTest {
         val file = createFile("foo bar baz")
 
         ConfigLoader.file().string()(file.toString()) shouldBe "foo bar baz"
+    }
+
+    @Test
+    fun `string from file with base directory`() {
+        val file = createFile("lolcats")
+
+        ConfigLoader.file(file.parent).string()(file.fileName.toString()) shouldBe "lolcats"
     }
 
     @Test
@@ -106,19 +118,18 @@ class ConfigLoaderTest {
 
     @Test
     fun `http with base uri`() {
-        val server = routes(
-            "/stuff.txt" bind Method.GET to { Response(Status.OK).body("foo bar baz") }
-        )
-
         ConfigLoader.http4k(Uri.of("http://localhost"), server).string()("stuff.txt") shouldBe "foo bar baz"
     }
 
     @Test
-    fun `missing from http`() {
-        val server = routes(
-            "/stuff.txt" bind Method.GET to { Response(Status.OK).body("foo bar baz") }
-        )
+    fun `http error`() {
+        shouldThrow<IOException> {
+            ConfigLoader.http4k(server)("error")
+        }
+    }
 
+    @Test
+    fun `missing from http`() {
         ConfigLoader.http4k(server).string()("missing.txt").shouldBeNull()
     }
 
@@ -143,5 +154,20 @@ class ConfigLoaderTest {
         shouldThrow<IllegalArgumentException> {
             (ConfigLoader.file() or ConfigLoader.resource()).string().orThrow("missing.txt")
         }
+    }
+
+    @Test
+    fun `missing string from env`() {
+        ConfigLoader.env()("foo").shouldBeNull()
+    }
+
+    @Test
+    fun `relative resource`() {
+        ConfigLoader.resource(fromClassloader = false).string()("relative.txt") shouldBe "reality"
+    }
+
+    @Test
+    fun `relative resource loader does not get root resource`() {
+        ConfigLoader.resource(fromClassloader = false).string()("text.txt").shouldBeNull()
     }
 }
