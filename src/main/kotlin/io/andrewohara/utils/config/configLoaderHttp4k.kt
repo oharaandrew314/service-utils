@@ -8,7 +8,7 @@ import java.io.IOException
 fun ConfigLoader.Companion.http4k(backend: HttpHandler = JavaHttpClient()) = ConfigLoader { name ->
     val response = backend(Request(Method.GET, name))
     when(response.status) {
-        Status.OK -> response.body.stream.readBytes()
+        Status.OK -> response.body.stream.readAllBytes()
         Status.NOT_FOUND -> null
         else -> throw IOException(response.toMessage())
     }

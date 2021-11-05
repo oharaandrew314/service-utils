@@ -1,5 +1,9 @@
 package io.andrewohara.utils.config
 
+import io.andrewohara.utils.mappers.gson
+import io.andrewohara.utils.mappers.jacksonJson
+import io.andrewohara.utils.mappers.jacksonYaml
+import io.andrewohara.utils.mappers.moshi
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -20,7 +24,6 @@ data class Config(
     val nullable: String? = null,
     val int: Int = 1337,
     val enum: Option = Option.A,
-    val instant: Instant = Instant.parse("2021-01-01T01:00:00Z"),
     val nested: Nested = Nested(string = "bar")
 ) {
     enum class Option { A }
@@ -74,12 +77,12 @@ class ConfigLoaderTest {
 
     @Test
     fun `moshi json`() {
-        ConfigLoader.resource().moshiJson<Config>()("config.json") shouldBe Config()
+        ConfigLoader.resource().moshi<Config>()("config.json") shouldBe Config()
     }
 
     @Test
     fun `gson json`() {
-        ConfigLoader.resource().gsonJson<Config>()("config.json") shouldBe Config()
+        ConfigLoader.resource().gson<Config>()("config.json") shouldBe Config()
     }
 
     @Test

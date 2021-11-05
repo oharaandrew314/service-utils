@@ -33,7 +33,8 @@ class ContractUiTest {
             descriptionPath = "openapi3.json"
             routes += getUser
         },
-        descriptionPath = "openapi3.json"
+        descriptionPath = "openapi3.json",
+        pageTitle = "Test API"
     )
 
     @Test

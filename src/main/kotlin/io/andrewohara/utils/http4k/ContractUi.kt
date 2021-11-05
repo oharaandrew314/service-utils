@@ -8,11 +8,11 @@ import org.http4k.routing.*
 
 object ContractUi {
 
-    private fun redocHtml(specPath: String) = """
+    private fun redocHtml(pageTitle: String, specPath: String) = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Redoc</title>
+    <title>$pageTitle</title>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
@@ -31,7 +31,7 @@ object ContractUi {
 </html>
 """
 
-    private fun swaggerUiHtml(specPath: String) = """
+    private fun swaggerUiHtml(pageTitle: String, specPath: String) = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -44,7 +44,7 @@ object ContractUi {
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.22.1/swagger-ui-bundle.js"></script> -->
     <link rel="stylesheet" href="//unpkg.com/swagger-ui-dist@3/swagger-ui.css" />
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.22.1/swagger-ui.css" /> -->
-    <title>Swagger UI</title>
+    <title>$pageTitle</title>
 </head>
 <body>
     <div id="swagger-ui"></div>
@@ -69,18 +69,19 @@ object ContractUi {
     operator fun invoke(
         contract: ContractRoutingHttpHandler,
         descriptionPath: String,
+        pageTitle: String,
         swaggerUiPath: String = "swagger",
-        redocPath: String = "redoc"
+        redocPath: String = "redoc",
     ): RoutingHttpHandler {
         return routes(
             "" bind Method.GET to {
                 Response(Status.FOUND).header("Location", swaggerUiPath)
             },
             swaggerUiPath bind Method.GET to {
-                Response(Status.OK).body(swaggerUiHtml(descriptionPath))
+                Response(Status.OK).body(swaggerUiHtml(pageTitle, descriptionPath))
             },
             redocPath bind Method.GET to {
-                Response(Status.OK).body(redocHtml(descriptionPath))
+                Response(Status.OK).body(redocHtml(pageTitle, descriptionPath))
             },
             contract
         )
