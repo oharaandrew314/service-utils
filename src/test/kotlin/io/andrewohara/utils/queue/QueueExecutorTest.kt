@@ -2,6 +2,7 @@ package io.andrewohara.utils.queue
 
 import io.andrewohara.awsmock.sqs.MockSqsV1
 import io.andrewohara.awsmock.sqs.backend.MockSqsBackend
+import io.andrewohara.utils.mappers.ValueMapper
 import io.andrewohara.utils.mappers.moshi
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
@@ -21,13 +22,13 @@ class QueueExecutorTest {
     private val queue = SqsV1Queue<Work>(
         sqs = MockSqsV1(sqs),
         queueUrl = sqsQueue.url,
-        messageMapper = QueueMessageMapper.moshi()
+        mapper = ValueMapper.moshi()
     )
 
-    private val task: Task<Work> = { work -> work.body.action }
+    private val task: Task<Work> = { work -> work.message.action }
 
-    private val blockingExecutor = QueueExecutor(queue, Worker.blocking(), task)
-    private val threadedExecutor = QueueExecutor(queue, Worker.fixedThreads(2), task)
+    private val blockingExecutor = QueueExecutor(queue, WorkerPool.blocking(), task)
+    private val threadedExecutor = QueueExecutor(queue, WorkerPool.fixedThreads(2), task)
 
     @Test
     fun `empty queue for blocking executor`() {

@@ -1,6 +1,5 @@
 package io.andrewohara.utils.queue
 
-import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
@@ -8,30 +7,29 @@ import java.util.concurrent.TimeUnit
 
 class QueueExecutor<Message>(
     private val queue: Queue<Message>,
-    private val worker: Worker,
-    private val task: Task<Message>
+    private val workerPool: WorkerPool,
+    private val task: Task<Message>,
+    private val onTaskError: (Task<Message>, Exception) -> Unit = { _, _ -> },
+    private val onPollError: (Exception) -> Unit = {}
 ) {
-    private val log = LoggerFactory.getLogger(javaClass)
-
     operator fun invoke(): List<Future<Any>> {
-        if (worker.availableConcurrency() <= 0) {
-            log.trace("Worker isn't ready.  Sleeping")
+        if (workerPool.available() <= 0) {
             return emptyList()
         }
 
         val messages = try {
-            queue.poll(worker.availableConcurrency())
+            queue.poll(workerPool.available())
         } catch (e: Exception) {
-            log.error("Error polling for messages from $queue", e)
-            throw e
+            onPollError(e)
+            emptyList()
         }
 
         return messages.map { item ->
-            worker {
+            workerPool {
                 try {
                     task(item)
                 } catch (e: Exception) {
-                    log.error("Error processing task", e)
+                    onTaskError(task, e)
                 }
             }
         }
@@ -45,8 +43,6 @@ class QueueExecutor<Message>(
             pollInterval.toMillis(),
             TimeUnit.MILLISECONDS
         )
-
-        log.debug("Polling $queue every $pollInterval")
 
         return object: ExecutorHandle {
             override fun stop(timeout: Duration?) {

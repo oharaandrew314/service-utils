@@ -1,7 +1,6 @@
 package io.andrewohara.utils.jdbc
 
 import java.sql.PreparedStatement
-import java.sql.ResultSet
 import java.sql.Timestamp
 import java.sql.Types
 import java.time.Instant
@@ -37,9 +36,3 @@ fun PreparedStatement.setNullableBoolean(position: Int, value: Boolean?, jdbcTyp
         setNull(position, jdbcType)
     }
 }
-
-fun ResultSet.getNullableInteger(key: String): Int? = getBigDecimal(key)?.toInt()
-
-fun ResultSet.getNullableBoolean(key: String): Boolean? = getBoolean(key).let { if (wasNull()) null else it }
-
-fun ResultSet.getNullableInstant(key: String): Instant? = getTimestamp(key)?.toInstant()
