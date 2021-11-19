@@ -1,69 +1,69 @@
 package io.andrewohara.utils.queue
 
-import io.andrewohara.awsmock.sqs.MockSqsV1
-import io.andrewohara.awsmock.sqs.backend.MockSqsBackend
-import io.andrewohara.utils.mappers.Moshi.moshi
-import io.andrewohara.utils.mappers.ValueMapper
+import io.andrewohara.utils.jdk.MutableFixedClock
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import org.junit.jupiter.api.Test
+import java.time.Duration
+import java.time.Instant
 
 class QueueExecutorTest {
 
-    data class Work(
-        val id: Int,
-        val action: String
-    )
+    private val clock = MutableFixedClock(Instant.parse("2021-11-19T12:00:00Z"))
+    private val queue = WorkQueue.memoryThreadSafe<String>(clock, lockFor = Duration.ofSeconds(10))
 
-    private val sqs = MockSqsBackend()
-    private val sqsQueue = sqs.create("work")!!
+    private val task: Task<String> = { work -> work.message }
 
-    private val queue = SqsV1Queue<Work>(
-        sqs = MockSqsV1(sqs),
-        queueUrl = sqsQueue.url,
-        mapper = ValueMapper.moshi()
-    )
-
-    private val task: Task<Work> = { work -> work.message.action }
-
-    private val blockingExecutor = QueueExecutor(queue, WorkerPool.blocking(), task)
-    private val threadedExecutor = QueueExecutor(queue, WorkerPool.fixedThreads(2), task)
+    private val executor = QueueExecutor(queue, task)
 
     @Test
-    fun `empty queue for blocking executor`() {
-        blockingExecutor().shouldBeEmpty()
+    fun `executeNow with empty queue`() {
+        executor.executeNow().shouldBeEmpty()
     }
 
     @Test
-    fun `single item in queue for blocking executor`() {
-        queue.send(Work(1, "do"))
+    fun `executeNow with single item in queue`() {
+        queue.send("do")
 
-        blockingExecutor()
-            .shouldHaveSize(1)
-            .map { it.get() }
-            .shouldContainExactly("do")
+        executor.executeNow().shouldContainExactly("do")
+
+        clock += Duration.ofSeconds(20)
+        queue.poll(10).shouldBeEmpty()
     }
 
     @Test
-    fun `multiple items in queue for blocking executor`() {
-        queue.send(Work(1, "do"))
-        queue.send(Work(2, "stuff"))
+    fun `executeNow with multiple items in queue`() {
+        queue.send("do")
+        queue.send("stuff")
 
-        blockingExecutor()
-            .shouldHaveSize(1)
-            .map { it.get() }
-            .shouldContainExactly("do")
+        executor.executeNow().shouldContainExactly("do", "stuff")
+
+        clock += Duration.ofSeconds(20)
+        queue.poll(10).shouldBeEmpty()
     }
 
     @Test
-    fun `multiple items in queue for threaded executor`() {
-        queue.send(Work(1, "do"))
-        queue.send(Work(2, "stuff"))
+    fun `executeNow with multiple items in queue and limited buffer size`() {
+        queue.send("do")
+        queue.send("stuff")
 
-        threadedExecutor()
-            .shouldHaveSize(2)
-            .map { it.get() }
-            .shouldContainExactly("do", "stuff")
+        val executor = QueueExecutor(queue, task, bufferSize = 1)
+        executor.executeNow().shouldContainExactly("do")
+
+        clock += Duration.ofSeconds(20)
+        queue.poll(10).shouldHaveSize(1)
+    }
+
+    @Test
+    fun `executeNow with multiple items in queue and autoDeleteMessage disabled`() {
+        queue.send("do")
+        queue.send("stuff")
+
+        val executor = QueueExecutor(queue, task, autoDeleteMessage = false)
+        executor.executeNow().shouldContainExactly("do", "stuff")
+
+        clock += Duration.ofSeconds(20)
+        queue.poll(10).shouldHaveSize(2)
     }
 }

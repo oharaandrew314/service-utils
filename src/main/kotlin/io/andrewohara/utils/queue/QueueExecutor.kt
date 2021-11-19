@@ -1,54 +1,49 @@
 package io.andrewohara.utils.queue
 
 import java.time.Duration
-import java.util.concurrent.Executors
-import java.util.concurrent.Future
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.*
 
 class QueueExecutor<Message>(
-    private val queue: Queue<Message>,
-    private val workerPool: WorkerPool,
+    private val queue: WorkQueue<Message>,
     private val task: Task<Message>,
-    private val onTaskError: (Task<Message>, Exception) -> Unit = { _, _ -> },
-    private val onPollError: (Exception) -> Unit = {}
+    private val bufferSize: Int = 10,
+    private val onTaskError: (QueueItem<Message>, Throwable) -> Unit = { _, error -> error.printStackTrace() },
+    private val onPollError: (Throwable) -> Unit = { it.printStackTrace() },
+    private val autoDeleteMessage: Boolean = true
 ) {
-    operator fun invoke(): List<Future<Any>> {
-        if (workerPool.available() <= 0) {
-            return emptyList()
-        }
-
+    fun executeNow(): List<Any?> {
         val messages = try {
-            queue.poll(workerPool.available())
-        } catch (e: Exception) {
+            queue.poll(bufferSize)
+        } catch (e: Throwable) {
             onPollError(e)
             emptyList()
         }
 
-        return messages.map { item ->
-            workerPool {
-                try {
-                    task(item)
-                } catch (e: Exception) {
-                    onTaskError(task, e)
-                }
+        return messages.map { message ->
+            try {
+                val result = task(message)
+                if (autoDeleteMessage) message.delete()
+                result
+            } catch (e: Throwable) {
+                onTaskError(message, e)
+                null
             }
         }
     }
 
-    fun scheduleEvery(pollInterval: Duration): ExecutorHandle {
-        val scheduler = Executors.newSingleThreadScheduledExecutor()
-        scheduler.scheduleWithFixedDelay(
-            ::invoke,
-            pollInterval.toMillis(),
-            pollInterval.toMillis(),
-            TimeUnit.MILLISECONDS
-        )
+    fun start(workers: Int): ExecutorHandle {
+        val executor = Executors.newCachedThreadPool()
+        repeat(workers) {
+            while (!Thread.currentThread().isInterrupted) {
+                executeNow()
+            }
+        }
 
         return object: ExecutorHandle {
             override fun stop(timeout: Duration?) {
-                scheduler.shutdown()
+                executor.shutdown()
                 if (timeout != null) {
-                    scheduler.awaitTermination(timeout.seconds, TimeUnit.SECONDS)
+                    executor.awaitTermination(timeout.seconds, TimeUnit.SECONDS)
                 }
             }
 

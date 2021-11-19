@@ -6,17 +6,34 @@ import com.amazonaws.services.sqs.model.SendMessageRequest
 import io.andrewohara.utils.mappers.ValueMapper
 import java.time.Duration
 
-class SqsV1Queue<Message>(
+class SqsV1WorkQueue<Message>(
     private val sqs: AmazonSQS,
-    private val queueUrl: String,
+    private val url: String,
     private val mapper: ValueMapper<Message>,
-    private val pollWaitTime: Duration? = null,
-    private val deliveryDelay: Duration? =  null,
-): Queue<Message> {
+    private val pollWaitTime: Duration?,
+    private val deliveryDelay: Duration?,
+): WorkQueue<Message> {
+
+    companion object {
+        private const val maxReceiveCount = 10  // SQS has a limit to the number of messages to receive
+        fun <Message> WorkQueue.Companion.sqsV1(
+            sqs: AmazonSQS,
+            url: String,
+            mapper: ValueMapper<Message>,
+            pollWaitTime: Duration? = null,
+            deliveryDelay: Duration? =  null,
+        ) = SqsV1WorkQueue(
+            sqs = sqs,
+            url = url,
+            mapper = mapper,
+            pollWaitTime = pollWaitTime,
+            deliveryDelay = deliveryDelay
+        )
+    }
 
     override fun poll(maxMessages: Int): List<QueueItem<Message>> {
-        val request = ReceiveMessageRequest(queueUrl)
-            .withMaxNumberOfMessages(maxMessages.coerceAtMost(10)) // SQS has a limit to the number of messages to receive
+        val request = ReceiveMessageRequest(url)
+            .withMaxNumberOfMessages(maxMessages.coerceAtMost(maxReceiveCount))
             .withWaitTimeSeconds(pollWaitTime?.seconds?.toInt())
 
         return sqs.receiveMessage(request).messages.mapNotNull { message ->
@@ -30,14 +47,14 @@ class SqsV1Queue<Message>(
 
     override fun send(message: Message) {
         val request = SendMessageRequest()
-            .withQueueUrl(queueUrl)
+            .withQueueUrl(url)
             .withMessageBody(mapper.write(message))
             .withDelaySeconds(deliveryDelay?.seconds?.toInt())
 
         sqs.sendMessage(request)
     }
 
-    override fun toString() = "${javaClass.simpleName}: $queueUrl"
+    override fun toString() = "${javaClass.simpleName}: $url"
 
     inner class SqsQueueItem(
         private val messageId: String,
@@ -45,11 +62,11 @@ class SqsV1Queue<Message>(
         private val receiptHandle: String
     ): QueueItem<Message> {
         override fun delete() {
-            sqs.deleteMessage(queueUrl, receiptHandle)
+            sqs.deleteMessage(url, receiptHandle)
         }
 
         override fun extendLock(duration: Duration) {
-            sqs.changeMessageVisibility(queueUrl, receiptHandle, duration.toSeconds().toInt())
+            sqs.changeMessageVisibility(url, receiptHandle, duration.toSeconds().toInt())
         }
 
         override fun toString() = messageId
