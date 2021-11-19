@@ -43,6 +43,7 @@ class QueueExecutor<Message>(
                             Thread.sleep(interval.toMillis())
                         } catch (e: InterruptedException) {
                             Thread.currentThread().interrupt()
+                            break
                         }
                     }
                 }

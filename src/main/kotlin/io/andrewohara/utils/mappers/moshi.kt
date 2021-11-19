@@ -10,23 +10,22 @@ import okio.source
 import java.io.Reader
 
 
+fun defaultMoshi(): Moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
 
-object Moshi {
-    fun defaultMoshi(): Moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
+class MoshiValueMapper<T>(mapper: Moshi = defaultMoshi(), type: Class<T>): ValueMapper<T> {
+    private val adapter = mapper.adapter(type)
 
-    inline fun <reified T> ValueMapper.Companion.moshi(mapper: Moshi = defaultMoshi()) = object: ValueMapper<T> {
-        val adapter = mapper.adapter(T::class.java)
+    override fun read(reader: Reader) = adapter.fromJson(reader.readText())
+    override fun read(source: String) = adapter.fromJson(source)!!
+    override fun read(input: InputStream) = adapter.fromJson(input.source().buffer())!!
 
-        override fun read(reader: Reader) = adapter.fromJson(reader.readText())
-        override fun read(source: String) = adapter.fromJson(source)!!
-        override fun read(input: InputStream) = adapter.fromJson(input.source().buffer())!!
+    override fun write(value: T) = adapter.toJson(value)
+}
 
-        override fun write(value: T) = adapter.toJson(value)
-    }
+inline fun <reified T> ValueMapper.Companion.moshi(mapper: Moshi = defaultMoshi()) = MoshiValueMapper(mapper, T::class.java)
 
-    inline fun <reified T> ConfigLoader<ByteArray>.moshi(mapper: Moshi = defaultMoshi()) = configMapper(ValueMapper.moshi<T>(mapper))
-    inline fun <reified T> ConfigLoader<ByteArray>.moshi(consumer: (Moshi) -> Moshi): ConfigLoader<T> {
-        val mapper = consumer(defaultMoshi())
-        return configMapper(ValueMapper.moshi(mapper))
-    }
+inline fun <reified T> ConfigLoader<ByteArray>.moshi(mapper: Moshi = defaultMoshi()) = configMapper(ValueMapper.moshi<T>(mapper))
+inline fun <reified T> ConfigLoader<ByteArray>.moshi(consumer: (Moshi) -> Moshi): ConfigLoader<T> {
+    val mapper = consumer(defaultMoshi())
+    return configMapper(ValueMapper.moshi(mapper))
 }

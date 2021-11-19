@@ -13,13 +13,15 @@ fun defaultJacksonJson(): JsonMapper = JsonMapper().apply {
     disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
 }
 
-inline fun <reified T> ValueMapper.Companion.jacksonJson(mapper: JsonMapper = defaultJacksonJson()) = object: ValueMapper<T> {
-    override fun read(reader: Reader) = mapper.readValue(reader, T::class.java)
-    override fun read(input: InputStream) = mapper.readValue(input, T::class.java)
-    override fun read(source: String) = mapper.readValue(source, T::class.java)
-    override fun read(source: ByteArray) = mapper.readValue(source, T::class.java)
+class JacksonJsonValueMapper<T>(private val mapper: JsonMapper = defaultJacksonJson(), private val type: Class<T>): ValueMapper<T> {
+    override fun read(reader: Reader) = mapper.readValue(reader, type)
+    override fun read(input: InputStream) = mapper.readValue(input, type)
+    override fun read(source: String) = mapper.readValue(source, type)
+    override fun read(source: ByteArray) = mapper.readValue(source, type)
     override fun write(value: T) = mapper.writeValueAsString(value)
 }
+
+inline fun <reified T> ValueMapper.Companion.jacksonJson(mapper: JsonMapper = defaultJacksonJson()) = JacksonJsonValueMapper(mapper, T::class.java)
 
 inline fun <reified T> ConfigLoader<ByteArray>.jacksonJson(mapper: JsonMapper = defaultJacksonJson()) = configMapper(ValueMapper.jacksonJson<T>(mapper))
 inline fun <reified T> ConfigLoader<ByteArray>.jacksonJson(consumer: (JsonMapper) -> JsonMapper): ConfigLoader<T> {
