@@ -2,8 +2,8 @@ package io.andrewohara.utils.queue
 
 import io.andrewohara.awsmock.sqs.MockSqsV1
 import io.andrewohara.awsmock.sqs.backend.MockSqsBackend
+import io.andrewohara.utils.mappers.Moshi.moshi
 import io.andrewohara.utils.mappers.ValueMapper
-import io.andrewohara.utils.mappers.moshi
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize

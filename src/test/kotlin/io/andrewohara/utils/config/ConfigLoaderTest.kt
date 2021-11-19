@@ -1,9 +1,8 @@
 package io.andrewohara.utils.config
 
-import io.andrewohara.utils.mappers.gson
-import io.andrewohara.utils.mappers.jacksonJson
-import io.andrewohara.utils.mappers.jacksonYaml
-import io.andrewohara.utils.mappers.moshi
+import io.andrewohara.utils.mappers.*
+import io.andrewohara.utils.mappers.JacksonYaml.jacksonYaml
+import io.andrewohara.utils.mappers.Moshi.moshi
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
