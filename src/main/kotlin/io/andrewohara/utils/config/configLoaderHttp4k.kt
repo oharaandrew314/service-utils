@@ -15,6 +15,11 @@ fun ConfigLoader.Companion.http4k(backend: HttpHandler = JavaHttpClient()) = Con
 }
 
 fun ConfigLoader.Companion.http4k(
+    baseUri: String,
+    backend: HttpHandler = JavaHttpClient(),
+) = http4k(Uri.of(baseUri), backend)
+
+fun ConfigLoader.Companion.http4k(
     baseUri: Uri,
     backend: HttpHandler = JavaHttpClient(),
 ) = http4k(ClientFilters.SetBaseUriFrom(baseUri).then(backend))

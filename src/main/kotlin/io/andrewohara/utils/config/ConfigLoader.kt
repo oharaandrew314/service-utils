@@ -2,6 +2,10 @@ package io.andrewohara.utils.config
 
 import io.andrewohara.utils.mappers.ValueMapper
 import java.lang.IllegalArgumentException
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Path
