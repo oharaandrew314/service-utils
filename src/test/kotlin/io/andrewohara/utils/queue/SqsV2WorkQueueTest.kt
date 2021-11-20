@@ -3,6 +3,7 @@ package io.andrewohara.utils.queue
 import io.andrewohara.awsmock.sqs.MockSqsV2
 import io.andrewohara.awsmock.sqs.backend.MockSqsBackend
 import io.andrewohara.utils.mappers.ValueMapper
+import io.andrewohara.utils.mappers.string
 import io.andrewohara.utils.queue.SqsV2WorkQueue.Companion.sqsV2
 import java.time.Clock
 import java.time.Duration

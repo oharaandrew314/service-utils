@@ -76,16 +76,16 @@ publishing {
     }
 }
 
-sourceCompatibility = 11
-targetCompatibility = 11
+sourceCompatibility = 8
+targetCompatibility = 8
 compileKotlin {
-    kotlinOptions.jvmTarget = "11"
+    kotlinOptions.jvmTarget = "1.8"
     kotlinOptions {
         languageVersion = "1.5"
     }
 }
 compileTestKotlin {
-    kotlinOptions.jvmTarget = "11"
+    kotlinOptions.jvmTarget = "1.8"
 }
 
 test {
