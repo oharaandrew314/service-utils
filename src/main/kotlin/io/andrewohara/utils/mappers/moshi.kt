@@ -19,7 +19,7 @@ class MoshiValueMapper<T>(mapper: Moshi = defaultMoshi(), type: Class<T>): Value
     override fun read(source: String) = adapter.fromJson(source)!!
     override fun read(input: InputStream) = adapter.fromJson(input.source().buffer())!!
 
-    override fun write(value: T) = adapter.toJson(value)
+    override fun write(value: T): String = adapter.toJson(value)
 }
 
 inline fun <reified T> ValueMapper.Companion.moshi(mapper: Moshi = defaultMoshi()) = MoshiValueMapper(mapper, T::class.java)

@@ -11,11 +11,11 @@ interface ValueMapper<T> {
 
     fun write(value: T): String
 
-    companion object {
-        fun string() = object: ValueMapper<String> {
-            override fun read(source: String) = source
-            override fun read(reader: Reader) = reader.readText()
-            override fun write(value: String) = value
-        }
-    }
+    companion object
+}
+
+fun ValueMapper.Companion.string() = object: ValueMapper<String> {
+    override fun read(source: String) = source
+    override fun read(reader: Reader) = reader.readText()
+    override fun write(value: String) = value
 }

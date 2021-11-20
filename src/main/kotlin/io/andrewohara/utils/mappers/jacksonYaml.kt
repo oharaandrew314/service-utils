@@ -14,12 +14,12 @@ fun defaultJacksonYaml() = YAMLMapper().apply {
 }
 
 class JacksonYamlValueMapper<T>(private val mapper: YAMLMapper = defaultJacksonYaml(), private val type: Class<T>): ValueMapper<T> {
-    override fun read(reader: Reader) = mapper.readValue(reader, type)
-    override fun read(input: InputStream) = mapper.readValue(input, type)
-    override fun read(source: ByteArray) = mapper.readValue(source, type)
-    override fun read(source: String) = mapper.readValue(source, type)
+    override fun read(reader: Reader): T = mapper.readValue(reader, type)
+    override fun read(input: InputStream): T = mapper.readValue(input, type)
+    override fun read(source: ByteArray): T = mapper.readValue(source, type)
+    override fun read(source: String): T = mapper.readValue(source, type)
 
-    override fun write(value: T) = mapper.writeValueAsString(value)
+    override fun write(value: T): String = mapper.writeValueAsString(value)
 }
 
 inline fun <reified T> ValueMapper.Companion.jacksonYaml(mapper: YAMLMapper = defaultJacksonYaml()) = JacksonYamlValueMapper(mapper, T::class.java)

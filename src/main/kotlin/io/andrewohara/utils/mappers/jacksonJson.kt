@@ -14,11 +14,11 @@ fun defaultJacksonJson(): JsonMapper = JsonMapper().apply {
 }
 
 class JacksonJsonValueMapper<T>(private val mapper: JsonMapper = defaultJacksonJson(), private val type: Class<T>): ValueMapper<T> {
-    override fun read(reader: Reader) = mapper.readValue(reader, type)
-    override fun read(input: InputStream) = mapper.readValue(input, type)
-    override fun read(source: String) = mapper.readValue(source, type)
-    override fun read(source: ByteArray) = mapper.readValue(source, type)
-    override fun write(value: T) = mapper.writeValueAsString(value)
+    override fun read(reader: Reader): T = mapper.readValue(reader, type)
+    override fun read(input: InputStream): T = mapper.readValue(input, type)
+    override fun read(source: String): T = mapper.readValue(source, type)
+    override fun read(source: ByteArray): T = mapper.readValue(source, type)
+    override fun write(value: T): String = mapper.writeValueAsString(value)
 }
 
 inline fun <reified T> ValueMapper.Companion.jacksonJson(mapper: JsonMapper = defaultJacksonJson()) = JacksonJsonValueMapper(mapper, T::class.java)

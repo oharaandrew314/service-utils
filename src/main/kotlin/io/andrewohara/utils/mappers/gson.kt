@@ -8,9 +8,9 @@ import java.io.Reader
 class GsonValueMapper<T>(mapper: Gson = Gson(), type: Class<T>): ValueMapper<T> {
     private val adapter = mapper.getAdapter(type)
 
-    override fun read(reader: Reader) = adapter.fromJson(reader)
-    override fun read(source: String) = adapter.fromJson(source)
-    override fun write(value: T) = adapter.toJson(value)
+    override fun read(reader: Reader): T = adapter.fromJson(reader)
+    override fun read(source: String): T = adapter.fromJson(source)
+    override fun write(value: T): String = adapter.toJson(value)
 }
 
 inline fun <reified T> ValueMapper.Companion.gson(mapper: Gson = Gson()) = GsonValueMapper(mapper, T::class.java)
