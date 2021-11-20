@@ -71,7 +71,7 @@ class SqsV2WorkQueue<Message>(
             sqs.changeMessageVisibility {
                 it.queueUrl(url)
                 it.receiptHandle(receiptHandle)
-                it.visibilityTimeout(duration.toSeconds().toInt())
+                it.visibilityTimeout(duration.seconds.toInt())
             }
         }
 

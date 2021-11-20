@@ -66,7 +66,7 @@ class SqsV1WorkQueue<Message>(
         }
 
         override fun extendLock(duration: Duration) {
-            sqs.changeMessageVisibility(url, receiptHandle, duration.toSeconds().toInt())
+            sqs.changeMessageVisibility(url, receiptHandle, duration.seconds.toInt())
         }
 
         override fun toString() = messageId

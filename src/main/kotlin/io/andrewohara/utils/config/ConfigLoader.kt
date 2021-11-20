@@ -2,13 +2,10 @@ package io.andrewohara.utils.config
 
 import io.andrewohara.utils.mappers.ValueMapper
 import java.lang.IllegalArgumentException
-import java.net.URI
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.*
 
 fun interface ConfigLoader<T>: (String) -> T? {
@@ -18,7 +15,7 @@ fun interface ConfigLoader<T>: (String) -> T? {
     companion object
 }
 
-fun ConfigLoader.Companion.file(base: Path = Path.of(".")) = ConfigLoader { name ->
+fun ConfigLoader.Companion.file(base: Path = Paths.get(".")) = ConfigLoader { name ->
     val path = base.resolve(name)
     if (Files.exists(path)) Files.readAllBytes(path) else null
 }
