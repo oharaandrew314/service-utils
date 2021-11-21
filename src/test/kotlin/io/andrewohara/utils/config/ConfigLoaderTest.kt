@@ -5,6 +5,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import org.http4k.core.*
+import org.http4k.format.Jackson
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.AfterEach
@@ -15,19 +16,18 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
 
-data class Config(
-    val string: String = "foo",
-    val nullable: String? = null,
-    val int: Int = 1337,
-    val enum: Option = Option.A,
-    val nested: Nested = Nested(string = "bar")
-) {
-    enum class Option { A }
-    data class Nested(val string: String)
-}
-
-
 class ConfigLoaderTest {
+
+    private data class Config(
+        val string: String = "foo",
+        val nullable: String? = null,
+        val int: Int = 1337,
+        val enum: Option = Option.A,
+        val nested: Nested = Nested(string = "bar")
+    ) {
+        enum class Option { A }
+        data class Nested(val string: String)
+    }
 
     private val files = mutableListOf<Path>()
     private val server = routes(
@@ -84,6 +84,11 @@ class ConfigLoaderTest {
     @Test
     fun `jackson yaml`() {
         ConfigLoader.resource().jacksonYaml<Config>()("config.json") shouldBe Config()
+    }
+
+    @Test
+    fun `http4k jackson`() {
+        ConfigLoader.resource().http4k<Config>(Jackson)("config.json") shouldBe Config()
     }
 
     @Test
