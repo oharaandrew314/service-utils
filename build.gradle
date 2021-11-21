@@ -37,6 +37,7 @@ dependencies {
     compileOnly "org.http4k:http4k-format-moshi"
     compileOnly "org.http4k:http4k-format-gson"
     compileOnly 'io.split.client:java-client:4.3.0'
+    compileOnly group: 'com.zaxxer', name: 'HikariCP', version: '4.0.3'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
