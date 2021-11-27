@@ -15,3 +15,5 @@ data class MutableFixedClock(private var time: Instant, private val zone: ZoneId
         time -= duration
     }
 }
+
+fun Instant.toClock(zone: ZoneId = ZoneOffset.UTC) = MutableFixedClock(this, zone)
