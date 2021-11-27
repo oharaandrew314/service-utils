@@ -18,7 +18,6 @@ Follow the instructions on Jitpack.
 - Http4k Contract UI
 - Null-safe JDBC PreparedStatement method
 - DynamoDB V1
-- Javalin Filters
 - Queue Executor
 
 ## TODO

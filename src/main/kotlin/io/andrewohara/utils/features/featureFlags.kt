@@ -1,17 +1,15 @@
 package io.andrewohara.utils.features
 
-import java.util.*
-
-interface FeatureFlags {
+fun interface FeatureFlags {
     operator fun get(feature: String): FeatureFlag
 
     companion object
 }
 
-interface FeatureFlag {
-    operator fun invoke(key: String = UUID.randomUUID().toString()): String
+fun interface FeatureFlag {
+    operator fun invoke(key: String): String
 
-    fun isEnabled(key: String = UUID.randomUUID().toString()): Boolean {
+    fun isEnabled(key: String): Boolean {
         val state = invoke(key)
         return enabledStates.any { it.equals(state, ignoreCase = true) }
     }
@@ -21,10 +19,11 @@ interface FeatureFlag {
     }
 }
 
-fun FeatureFlag.Companion.static(value: String = "on") = object: FeatureFlag {
-    override fun invoke(key: String) = value
-}
+fun FeatureFlag.Companion.static(value: String = "on") = static(emptyMap(), value)
+fun FeatureFlag.Companion.static(values: Map<String, String>, defaultValue: String = "on") = FeatureFlag { key -> values[key] ?: defaultValue }
 
-fun FeatureFlags.Companion.static(value: String = "on") = object: FeatureFlags {
-    override fun get(feature: String) = FeatureFlag.static(value)
+fun FeatureFlags.Companion.static(value: String = "on") = static(defaultState = value)
+fun FeatureFlags.Companion.static(vararg states: Pair<String, String>, defaultState: String = "on") = static(states.toMap(), defaultState)
+fun FeatureFlags.Companion.static(features: Map<String, String>, defaultState: String = "on") = FeatureFlags { name ->
+    FeatureFlag.static(features[name] ?: defaultState)
 }

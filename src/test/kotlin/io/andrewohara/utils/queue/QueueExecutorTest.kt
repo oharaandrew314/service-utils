@@ -13,9 +13,8 @@ class QueueExecutorTest {
     private val clock = MutableFixedClock(Instant.parse("2021-11-19T12:00:00Z"))
     private val queue = WorkQueue.memoryThreadSafe<String>(clock, lockFor = Duration.ofSeconds(10))
 
-    private val task: Task<String> = { work -> work.message }
-
-    private val executor = QueueExecutor(queue, task)
+    private val task = Task<String> { work -> work.message }
+    private val executor = QueueExecutor(queue) { task(it) }
 
     @Test
     fun `executeNow with empty queue`() {
@@ -48,7 +47,7 @@ class QueueExecutorTest {
         queue.send("do")
         queue.send("stuff")
 
-        val executor = QueueExecutor(queue, task, bufferSize = 1)
+        val executor = QueueExecutor(queue, bufferSize = 1) { task(it) }
         executor.executeNow().shouldContainExactly("do")
 
         clock += Duration.ofSeconds(20)
@@ -60,7 +59,7 @@ class QueueExecutorTest {
         queue.send("do")
         queue.send("stuff")
 
-        val executor = QueueExecutor(queue, task, autoDeleteMessage = false)
+        val executor = QueueExecutor(queue, autoDeleteMessage = false) { task(it) }
         executor.executeNow().shouldContainExactly("do", "stuff")
 
         clock += Duration.ofSeconds(20)

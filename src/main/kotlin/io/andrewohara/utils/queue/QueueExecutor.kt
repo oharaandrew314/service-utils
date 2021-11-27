@@ -5,12 +5,12 @@ import java.util.concurrent.*
 
 class QueueExecutor<Message>(
     private val queue: WorkQueue<Message>,
-    private val task: Task<Message>,
     private val bufferSize: Int = 10,
     private val onTaskError: (QueueItem<Message>, Throwable) -> Unit = { _, error -> error.printStackTrace() },
     private val onPollError: (Throwable) -> Unit = { it.printStackTrace() },
     private val autoDeleteMessage: Boolean = true,
-    private val interval: Duration? = null
+    private val interval: Duration? = null,
+    private val task: Task<Message>
 ) {
     fun executeNow(): List<Any?> {
         val messages = try {
@@ -50,14 +50,11 @@ class QueueExecutor<Message>(
             }
         }
 
-        return object: ExecutorHandle {
-            override fun stop(timeout: Duration?) {
-                executor.shutdown()
-                if (timeout != null) {
-                    executor.awaitTermination(timeout.seconds, TimeUnit.SECONDS)
-                }
+        return ExecutorHandle { timeout ->
+            executor.shutdown()
+            if (timeout != null) {
+                executor.awaitTermination(timeout.seconds, TimeUnit.SECONDS)
             }
-
         }
     }
 }

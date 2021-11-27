@@ -2,7 +2,8 @@ package io.andrewohara.utils.queue
 
 import java.time.Duration
 
-typealias Task<Message> = (QueueItem<Message>) -> Any
+fun interface Task<Message>: (QueueItem<Message>) -> Any
+fun interface ExecutorHandle: (Duration?) -> Unit
 
 interface WorkQueue<Message> {
     fun send(message: Message)
@@ -17,6 +18,3 @@ interface QueueItem<Message> {
     fun extendLock(duration: Duration)
 }
 
-interface ExecutorHandle {
-    fun stop(timeout: Duration? = null)
-}
