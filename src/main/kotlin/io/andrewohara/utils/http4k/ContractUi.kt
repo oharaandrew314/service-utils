@@ -1,9 +1,8 @@
 package io.andrewohara.utils.http4k
 
 import org.http4k.contract.ContractRoutingHttpHandler
-import org.http4k.core.Method
-import org.http4k.core.Response
-import org.http4k.core.Status
+import org.http4k.core.*
+import org.http4k.lens.Header
 import org.http4k.routing.*
 
 object ContractUi {
@@ -75,13 +74,17 @@ object ContractUi {
     ): RoutingHttpHandler {
         return routes(
             "" bind Method.GET to {
-                Response(Status.FOUND).header("Location", swaggerUiPath)
+                Response(Status.FOUND).with(Header.LOCATION of Uri.of(swaggerUiPath))
             },
             swaggerUiPath bind Method.GET to {
-                Response(Status.OK).body(swaggerUiHtml(pageTitle, descriptionPath))
+                Response(Status.OK)
+                    .with(Header.CONTENT_TYPE of ContentType.TEXT_HTML)
+                    .body(swaggerUiHtml(pageTitle, descriptionPath))
             },
             redocPath bind Method.GET to {
-                Response(Status.OK).body(redocHtml(pageTitle, descriptionPath))
+                Response(Status.OK)
+                    .with(Header.CONTENT_TYPE of ContentType.TEXT_HTML)
+                    .body(redocHtml(pageTitle, descriptionPath))
             },
             contract
         )
