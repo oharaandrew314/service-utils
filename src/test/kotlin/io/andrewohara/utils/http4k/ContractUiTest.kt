@@ -4,6 +4,7 @@ import org.http4k.contract.contract
 import org.http4k.contract.div
 import org.http4k.contract.openapi.ApiInfo
 import org.http4k.contract.openapi.v3.OpenApi3
+import org.http4k.core.ContentType
 import org.http4k.core.Method.GET
 import org.http4k.core.Request
 import org.http4k.core.Response
@@ -11,6 +12,7 @@ import org.http4k.core.Status.Companion.OK
 import org.http4k.core.Status.Companion.NOT_FOUND
 import org.http4k.core.Status.Companion.FOUND
 import org.http4k.kotest.shouldHaveBody
+import org.http4k.kotest.shouldHaveContentType
 import org.http4k.kotest.shouldHaveHeader
 import org.http4k.kotest.shouldHaveStatus
 import org.http4k.lens.Path
@@ -63,6 +65,7 @@ class ContractUiTest {
         val response = contract(Request(GET, "/swagger"))
 
         response shouldHaveStatus OK
+        response shouldHaveContentType ContentType.TEXT_HTML
 //        response shouldHaveBody javaClass.classLoader.getResourceAsStream("swagger-ui.html")!!.reader().readText()
     }
 
@@ -73,6 +76,7 @@ class ContractUiTest {
         val expected = javaClass.classLoader.getResourceAsStream("api.json")!!.reader().readText()
 
         response shouldHaveStatus OK
+        response shouldHaveContentType ContentType.APPLICATION_JSON
         response shouldHaveBody expected
     }
 
