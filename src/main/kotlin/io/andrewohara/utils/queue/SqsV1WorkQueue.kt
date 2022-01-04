@@ -10,7 +10,7 @@ class SqsV1WorkQueue<Message>(
     private val sqs: AmazonSQS,
     private val url: String,
     private val mapper: ValueMapper<Message>,
-    private val pollWaitTime: Duration?,
+    private val pollWaitTime: Duration,
     private val deliveryDelay: Duration?,
 ): WorkQueue<Message> {
 
@@ -20,7 +20,7 @@ class SqsV1WorkQueue<Message>(
             sqs: AmazonSQS,
             url: String,
             mapper: ValueMapper<Message>,
-            pollWaitTime: Duration? = null,
+            pollWaitTime: Duration = Duration.ofSeconds(10),
             deliveryDelay: Duration? =  null,
         ) = SqsV1WorkQueue(
             sqs = sqs,
@@ -34,7 +34,7 @@ class SqsV1WorkQueue<Message>(
     override fun poll(maxMessages: Int): List<QueueItem<Message>> {
         val request = ReceiveMessageRequest(url)
             .withMaxNumberOfMessages(maxMessages.coerceAtMost(maxReceiveCount))
-            .withWaitTimeSeconds(pollWaitTime?.seconds?.toInt())
+            .withWaitTimeSeconds(pollWaitTime.seconds.toInt())
 
         return sqs.receiveMessage(request).messages.mapNotNull { message ->
             SqsQueueItem(

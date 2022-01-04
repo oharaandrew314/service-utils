@@ -8,7 +8,7 @@ class SqsV2WorkQueue<Message>(
     private val sqs: SqsClient,
     private val url: String,
     private val mapper: ValueMapper<Message>,
-    private val pollWaitTime: Duration?,
+    private val pollWaitTime: Duration,
     private val deliveryDelay: Duration?,
 ): WorkQueue<Message> {
 
@@ -18,7 +18,7 @@ class SqsV2WorkQueue<Message>(
             sqs: SqsClient,
             url: String,
             mapper: ValueMapper<Message>,
-            pollWaitTime: Duration? = null,
+            pollWaitTime: Duration = Duration.ofSeconds(10),
             deliveryDelay: Duration? =  null,
         ) = SqsV2WorkQueue(
             sqs = sqs,
@@ -33,7 +33,7 @@ class SqsV2WorkQueue<Message>(
         val response = sqs.receiveMessage {
             it.queueUrl(url)
             it.maxNumberOfMessages(maxMessages.coerceAtMost(maxReceiveCount))
-            it.waitTimeSeconds(pollWaitTime?.seconds?.toInt())
+            it.waitTimeSeconds(pollWaitTime.seconds.toInt())
         }
 
         return response.messages().mapNotNull { message ->
