@@ -36,10 +36,13 @@ fun ServerFilters.requestIdToMdc(
 ) = Filter { next ->
     { request ->
         mdc.clear()
-        (request.header(key) ?: generateRequestId())
-            ?.let { mdc.put(key, it) }
-
-        next(request)
+        val requestId = request.header(key) ?: generateRequestId()
+        if (requestId != null) {
+            mdc.put(key, requestId)
+            next(request).header(key, requestId)
+        } else {
+            next(request)
+        }
     }
 }
 

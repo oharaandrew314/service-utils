@@ -10,6 +10,8 @@ import org.http4k.core.*
 import org.http4k.filter.ClientFilters
 import org.http4k.filter.ServerFilters
 import org.http4k.kotest.shouldHaveBody
+import org.http4k.kotest.shouldHaveHeader
+import org.http4k.kotest.shouldNotHaveHeader
 import org.junit.jupiter.api.Test
 import org.slf4j.helpers.BasicMDCAdapter
 import java.lang.IllegalArgumentException
@@ -52,14 +54,18 @@ class Slf4jExtensionsTest {
     @Test
     fun `requestId to MDC`() {
         val request = request.header(requestIdName, "lolcats")
-        ServerFilters.requestIdToMdc(requestIdName, mdc).then(server)(request)
+        ServerFilters.requestIdToMdc(requestIdName, mdc)
+            .then(server)(request)
+            .shouldHaveHeader(requestIdName, "lolcats")
 
         mdc.get(requestIdName) shouldBe "lolcats"
     }
 
     @Test
     fun `requestId to MDC - no requestId`() {
-        ServerFilters.requestIdToMdc(requestIdName, mdc).then(server)(request)
+        ServerFilters.requestIdToMdc(requestIdName, mdc)
+            .then(server)(request)
+            .shouldNotHaveHeader(requestIdName)
 
         mdc.get(requestIdName).shouldBeNull()
     }
@@ -74,7 +80,9 @@ class Slf4jExtensionsTest {
 
     @Test
     fun `requestId to MDC - no requestId, with generator`() {
-        ServerFilters.requestIdToMdc(requestIdName, mdc) { "trolls" }.then(server)(request)
+        ServerFilters.requestIdToMdc(requestIdName, mdc) { "trolls" }
+            .then(server)(request)
+            .shouldHaveHeader(requestIdName, "trolls")
 
         mdc.get(requestIdName) shouldBe "trolls"
     }
