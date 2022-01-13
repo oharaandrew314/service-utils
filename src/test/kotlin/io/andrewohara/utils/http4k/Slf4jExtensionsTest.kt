@@ -8,6 +8,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import org.http4k.core.*
 import org.http4k.filter.ClientFilters
+import org.http4k.filter.ResponseFilters
 import org.http4k.filter.ServerFilters
 import org.http4k.kotest.shouldHaveBody
 import org.http4k.kotest.shouldHaveHeader
@@ -37,7 +38,7 @@ class Slf4jExtensionsTest {
 
     @Test
     fun `log response status - should log`() {
-        ServerFilters.logResponseStatus(logger, clock) { _, _ -> true }
+        ResponseFilters.logResponseStatus(logger, clock) { _, _ -> true }
             .then(server)(request)
 
         logger.shouldContainExactly("GET /: 200 OK in 10 ms")
@@ -45,7 +46,7 @@ class Slf4jExtensionsTest {
 
     @Test
     fun `log response status - should not log`() {
-        ServerFilters.logResponseStatus(logger, clock) { _, _ -> false }
+        ResponseFilters.logResponseStatus(logger, clock) { _, _ -> false }
             .then(server)(request)
 
         logger.shouldBeEmpty()

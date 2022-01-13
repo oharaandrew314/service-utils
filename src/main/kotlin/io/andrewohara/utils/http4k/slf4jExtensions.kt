@@ -4,6 +4,7 @@ import org.http4k.core.Filter
 import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.filter.ClientFilters
+import org.http4k.filter.ResponseFilters
 import org.http4k.filter.ServerFilters
 import org.slf4j.Logger
 import org.slf4j.MDC
@@ -11,7 +12,7 @@ import org.slf4j.spi.MDCAdapter
 import java.time.Clock
 import java.time.Duration
 
-fun ServerFilters.logResponseStatus(
+fun ResponseFilters.logResponseStatus(
     logger: Logger,
     clock: Clock = Clock.systemUTC(),
     shouldLog: (Request, Response) -> Boolean = { _, _ -> true }
