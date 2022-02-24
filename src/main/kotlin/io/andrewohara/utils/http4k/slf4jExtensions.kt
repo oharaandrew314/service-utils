@@ -29,7 +29,7 @@ fun ResponseFilters.logSummary(
                 .append("${request.method} ${request.uri}")
                 .append(": ${response.status}")
                 .append(" in ${duration.toMillis()} ms")
-                .appendIfPresent(request.source?.address, request.source?.address!!)
+                .appendIfPresent(request.source?.address, " from ${request.source?.address}")
                 .toString()
 
             logger.info(message)
