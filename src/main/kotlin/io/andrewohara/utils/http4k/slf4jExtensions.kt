@@ -1,5 +1,6 @@
 package io.andrewohara.utils.http4k
 
+import org.http4k.appendIfPresent
 import org.http4k.core.Filter
 import org.http4k.core.Request
 import org.http4k.core.Response
@@ -24,7 +25,15 @@ fun ResponseFilters.logSummary(
         val duration = Duration.between(start, clock.instant())
 
         if (shouldLog(request, response)) {
-            logger.info("${request.method} ${request.uri}: ${response.status} in ${duration.toMillis()} ms")
+            val sourceInfo = request.source?.let {
+                StringBuilder(" from ")
+                    .appendIfPresent(it.scheme, "${it.scheme}://")
+                    .append(it.address)
+                    .appendIfPresent(it.port, ":${it.port}")
+                    .toString()
+            } ?: ""
+
+            logger.info("${request.method} ${request.uri}: ${response.status} in ${duration.toMillis()} ms$sourceInfo")
         }
 
         response
