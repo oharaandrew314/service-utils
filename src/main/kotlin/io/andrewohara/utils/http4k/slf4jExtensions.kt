@@ -25,15 +25,14 @@ fun ResponseFilters.logSummary(
         val duration = Duration.between(start, clock.instant())
 
         if (shouldLog(request, response)) {
-            val sourceInfo = request.source?.let {
-                StringBuilder(" from ")
-                    .appendIfPresent(it.scheme, "${it.scheme}://")
-                    .append(it.address)
-                    .appendIfPresent(it.port, ":${it.port}")
-                    .toString()
-            } ?: ""
+            val message = StringBuilder()
+                .append("${request.method} ${request.uri}")
+                .append(": ${response.status}")
+                .append(" in ${duration.toMillis()} ms")
+                .appendIfPresent(request.source?.address, request.source?.address!!)
+                .toString()
 
-            logger.info("${request.method} ${request.uri}: ${response.status} in ${duration.toMillis()} ms$sourceInfo")
+            logger.info(message)
         }
 
         response
