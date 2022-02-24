@@ -96,9 +96,9 @@ class JdbcUtilsTest {
                     return Cat(
                         id = rs.getInt("id"),
                         name = rs.getString("name"),
-                        lives = rs.getNullableInteger("lives"),
-                        born = rs.getNullableInstant("born"),
-                        trills = rs.getNullableBoolean("trills")
+                        lives = rs.getIntOrNull("lives"),
+                        born = rs.getInstantOrNull("born"),
+                        trills = rs.getBoolOrNull("trills")
                     )
                 }
             }

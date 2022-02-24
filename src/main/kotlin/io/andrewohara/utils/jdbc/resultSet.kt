@@ -3,8 +3,16 @@ package io.andrewohara.utils.jdbc
 import java.sql.ResultSet
 import java.time.Instant
 
-fun ResultSet.getNullableInteger(key: String): Int? = getBigDecimal(key)?.toInt()
+fun ResultSet.getStringOrNull(key: String): String? = getString(key)
 
-fun ResultSet.getNullableBoolean(key: String): Boolean? = getBoolean(key).let { if (wasNull()) null else it }
+fun ResultSet.getIntOrNull(key: String): Int? = getBigDecimal(key)?.toInt()
 
-fun ResultSet.getNullableInstant(key: String): Instant? = getTimestamp(key)?.toInstant()
+fun ResultSet.getBoolOrNull(key: String): Boolean? = getBoolean(key).let { if (wasNull()) null else it }
+
+fun ResultSet.getInstantOrNull(key: String): Instant? = getTimestamp(key)?.toInstant()
+
+private inline fun <reified T: Enum<T>> ResultSet.getEnumOrNull(name: String): T? {
+    return getString(name)?.let {
+        enumValueOf<T>(it)
+    }
+}

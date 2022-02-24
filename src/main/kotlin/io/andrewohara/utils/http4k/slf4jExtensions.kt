@@ -7,13 +7,14 @@ import org.http4k.filter.ClientFilters
 import org.http4k.filter.ResponseFilters
 import org.http4k.filter.ServerFilters
 import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.slf4j.spi.MDCAdapter
 import java.time.Clock
 import java.time.Duration
 
-fun ResponseFilters.logResponseStatus(
-    logger: Logger,
+fun ResponseFilters.logSummary(
+    logger: Logger = LoggerFactory.getLogger("root"),
     clock: Clock = Clock.systemUTC(),
     shouldLog: (Request, Response) -> Boolean = { _, _ -> true }
 ) = Filter { next ->
@@ -63,7 +64,7 @@ fun ClientFilters.mdcToRequestId(
     }
 }
 
-fun ServerFilters.logErrors(logger: Logger) = Filter { next ->
+fun ServerFilters.logErrors(logger: Logger = LoggerFactory.getLogger("root")) = Filter { next ->
     { request ->
         try {
             next(request)

@@ -38,7 +38,7 @@ class Slf4jExtensionsTest {
 
     @Test
     fun `log response status - should log`() {
-        ResponseFilters.logResponseStatus(logger, clock) { _, _ -> true }
+        ResponseFilters.logSummary(logger, clock) { _, _ -> true }
             .then(server)(request)
 
         logger.shouldContainExactly("GET /: 200 OK in 10 ms")
@@ -46,7 +46,7 @@ class Slf4jExtensionsTest {
 
     @Test
     fun `log response status - should not log`() {
-        ResponseFilters.logResponseStatus(logger, clock) { _, _ -> false }
+        ResponseFilters.logSummary(logger, clock) { _, _ -> false }
             .then(server)(request)
 
         logger.shouldBeEmpty()
