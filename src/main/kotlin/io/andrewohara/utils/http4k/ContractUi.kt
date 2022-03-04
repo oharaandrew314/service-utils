@@ -7,6 +7,8 @@ import org.http4k.routing.*
 
 object ContractUi {
 
+    private const val swaggerUiVersion = "4.6.1"
+
     private fun redocHtml(pageTitle: String, specPath: String) = """
 <!DOCTYPE html>
 <html>
@@ -30,7 +32,7 @@ object ContractUi {
 </html>
 """
 
-    private fun swaggerUiHtml(pageTitle: String, specPath: String) = """
+    private fun swaggerUiHtml(pageTitle: String, specPath: String, displayOperationId: Boolean, displayRequestDuration: Boolean, persistAuthorization: Boolean) = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,11 +40,11 @@ object ContractUi {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="//unpkg.com/swagger-ui-dist@3/swagger-ui-standalone-preset.js"></script>
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.22.1/swagger-ui-standalone-preset.js"></script> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/$swaggerUiVersion/swagger-ui-standalone-preset.js"></script> -->
     <script src="//unpkg.com/swagger-ui-dist@3/swagger-ui-bundle.js"></script>
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.22.1/swagger-ui-bundle.js"></script> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/$swaggerUiVersion/swagger-ui-bundle.js"></script> -->
     <link rel="stylesheet" href="//unpkg.com/swagger-ui-dist@3/swagger-ui.css" />
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.22.1/swagger-ui.css" /> -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/$swaggerUiVersion/swagger-ui.css" /> -->
     <title>$pageTitle</title>
 </head>
 <body>
@@ -52,6 +54,11 @@ object ContractUi {
           SwaggerUIBundle({
             url: "$specPath",
             dom_id: '#swagger-ui',
+            deepLinking: true,
+            displayOperationId: $displayOperationId,
+            displayRequestDuration: $displayRequestDuration,
+            requestSnippetsEnabled: true,
+            persistAuthorization: $persistAuthorization,
             presets: [
               SwaggerUIBundle.presets.apis,
               SwaggerUIStandalonePreset
@@ -71,15 +78,25 @@ object ContractUi {
         pageTitle: String,
         swaggerUiPath: String = "swagger",
         redocPath: String = "redoc",
+        displayOperationId: Boolean = false,
+        displayRequestDuration: Boolean = false,
+        persistAuthorization: Boolean = false,
     ): RoutingHttpHandler {
         return routes(
             "" bind Method.GET to {
                 Response(Status.FOUND).with(Header.LOCATION of Uri.of(swaggerUiPath))
             },
             swaggerUiPath bind Method.GET to {
+                val body = swaggerUiHtml(
+                    pageTitle,
+                    descriptionPath,
+                    displayOperationId = displayOperationId,
+                    displayRequestDuration = displayRequestDuration,
+                    persistAuthorization = persistAuthorization
+                )
                 Response(Status.OK)
                     .with(Header.CONTENT_TYPE of ContentType.TEXT_HTML)
-                    .body(swaggerUiHtml(pageTitle, descriptionPath))
+                    .body(body)
             },
             redocPath bind Method.GET to {
                 Response(Status.OK)
