@@ -23,13 +23,14 @@ fun ResponseFilters.logSummary(
         val start = clock.instant()
         val response = next(request)
         val duration = Duration.between(start, clock.instant())
+        val source = request.header("X-Forwarded-For") ?: request.source?.address
 
         if (shouldLog(request, response)) {
             val message = StringBuilder()
                 .append("${request.method} ${request.uri}")
                 .append(": ${response.status}")
                 .append(" in ${duration.toMillis()} ms")
-                .appendIfPresent(request.source?.address, " from ${request.source?.address}")
+                .appendIfPresent(source, " from $source")
                 .toString()
 
             logger.info(message)
