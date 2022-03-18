@@ -1,10 +1,25 @@
 package io.andrewohara.utils.queue
 
 import com.amazonaws.services.sqs.AmazonSQS
+import com.amazonaws.services.sqs.model.DeleteMessageBatchRequestEntry
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest
 import com.amazonaws.services.sqs.model.SendMessageRequest
 import io.andrewohara.utils.mappers.ValueMapper
 import java.time.Duration
+
+fun <Message> WorkQueue.Companion.sqsV1(
+    sqs: AmazonSQS,
+    url: String,
+    mapper: ValueMapper<Message>,
+    pollWaitTime: Duration = Duration.ofSeconds(20),
+    deliveryDelay: Duration? =  null,
+) = SqsV1WorkQueue(
+    sqs = sqs,
+    url = url,
+    mapper = mapper,
+    pollWaitTime = pollWaitTime,
+    deliveryDelay = deliveryDelay
+)
 
 class SqsV1WorkQueue<Message>(
     private val sqs: AmazonSQS,
@@ -12,32 +27,19 @@ class SqsV1WorkQueue<Message>(
     private val mapper: ValueMapper<Message>,
     private val pollWaitTime: Duration,
     private val deliveryDelay: Duration?,
-): WorkQueue<Message> {
+): WorkQueue<Message, SqsV1QueueItem<Message>> {
 
     companion object {
         private const val maxReceiveCount = 10  // SQS has a limit to the number of messages to receive
-        fun <Message> WorkQueue.Companion.sqsV1(
-            sqs: AmazonSQS,
-            url: String,
-            mapper: ValueMapper<Message>,
-            pollWaitTime: Duration = Duration.ofSeconds(10),
-            deliveryDelay: Duration? =  null,
-        ) = SqsV1WorkQueue(
-            sqs = sqs,
-            url = url,
-            mapper = mapper,
-            pollWaitTime = pollWaitTime,
-            deliveryDelay = deliveryDelay
-        )
     }
 
-    override fun poll(maxMessages: Int): List<QueueItem<Message>> {
+    override fun invoke(maxMessages: Int): List<SqsV1QueueItem<Message>> {
         val request = ReceiveMessageRequest(url)
             .withMaxNumberOfMessages(maxMessages.coerceAtMost(maxReceiveCount))
             .withWaitTimeSeconds(pollWaitTime.seconds.toInt())
 
         return sqs.receiveMessage(request).messages.mapNotNull { message ->
-            SqsQueueItem(
+            SqsV1QueueItem(
                 messageId = message.messageId,
                 message = mapper.read(message.body) ?: return@mapNotNull null,
                 receiptHandle = message.receiptHandle
@@ -45,7 +47,7 @@ class SqsV1WorkQueue<Message>(
         }
     }
 
-    override fun send(message: Message) {
+    override fun plusAssign(message: Message) {
         val request = SendMessageRequest()
             .withQueueUrl(url)
             .withMessageBody(mapper.write(message))
@@ -54,21 +56,26 @@ class SqsV1WorkQueue<Message>(
         sqs.sendMessage(request)
     }
 
-    override fun toString() = "${javaClass.simpleName}: $url"
-
-    inner class SqsQueueItem(
-        private val messageId: String,
-        override val message: Message,
-        private val receiptHandle: String
-    ): QueueItem<Message> {
-        override fun delete() {
-            sqs.deleteMessage(url, receiptHandle)
-        }
-
-        override fun extendLock(duration: Duration) {
-            sqs.changeMessageVisibility(url, receiptHandle, duration.seconds.toInt())
-        }
-
-        override fun toString() = messageId
+    override fun minusAssign(items: Collection<SqsV1QueueItem<Message>>) {
+        sqs.deleteMessageBatch(
+            url,
+            items.map { item ->
+                DeleteMessageBatchRequestEntry()
+                    .withId(item.messageId)
+                    .withReceiptHandle(item.receiptHandle)
+            }
+        )
     }
+
+    override fun setTimeout(item: SqsV1QueueItem<Message>, duration: Duration) {
+        sqs.changeMessageVisibility(url, item.receiptHandle, duration.seconds.toInt())
+    }
+
+    override fun toString() = "${javaClass.simpleName}: $url"
 }
+
+data class SqsV1QueueItem<Message>(
+    val messageId: String,
+    override val message: Message,
+    val receiptHandle: String
+): QueueItem<Message>

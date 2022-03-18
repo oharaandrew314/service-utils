@@ -1,6 +1,10 @@
 package io.andrewohara.utils.queue
 
+import io.andrewohara.awsmock.sqs.MockSqsV2
+import io.andrewohara.awsmock.sqs.backend.MockSqsBackend
 import io.andrewohara.utils.jdk.MutableFixedClock
+import io.andrewohara.utils.mappers.ValueMapper
+import io.andrewohara.utils.mappers.jacksonJson
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
@@ -11,10 +15,17 @@ import java.time.Instant
 class QueueExecutorTest {
 
     private val clock = MutableFixedClock(Instant.parse("2021-11-19T12:00:00Z"))
-    private val queue = WorkQueue.memoryThreadSafe<String>(clock, lockFor = Duration.ofSeconds(10))
 
-    private val task = Task<String> { work -> work.message }
-    private val executor = QueueExecutor(queue) { task(it) }
+    private val sqsBackend = MockSqsBackend(clock)
+    private val backendQueue = sqsBackend.create("test")!!
+
+    private val queue = let {
+        val sqs = MockSqsV2(sqsBackend)
+        WorkQueue.sqsV2<String>(sqs, backendQueue.url, ValueMapper.jacksonJson())
+    }
+
+    private val task = Task<String, String> { work, _ -> work }
+    private val executor = QueueExecutor(queue, task = task)
 
     @Test
     fun `executeNow with empty queue`() {
@@ -23,46 +34,59 @@ class QueueExecutorTest {
 
     @Test
     fun `executeNow with single item in queue`() {
-        queue.send("do")
+        queue.plusAssign("do")
 
         executor.executeNow().shouldContainExactly("do")
 
         clock += Duration.ofSeconds(20)
-        queue.poll(10).shouldBeEmpty()
+        queue.invoke(10).shouldBeEmpty()
     }
 
     @Test
     fun `executeNow with multiple items in queue`() {
-        queue.send("do")
-        queue.send("stuff")
+        queue.plusAssign("do")
+        queue.plusAssign("stuff")
 
         executor.executeNow().shouldContainExactly("do", "stuff")
 
         clock += Duration.ofSeconds(20)
-        queue.poll(10).shouldBeEmpty()
+        queue.invoke(10).shouldBeEmpty()
     }
 
     @Test
     fun `executeNow with multiple items in queue and limited buffer size`() {
-        queue.send("do")
-        queue.send("stuff")
+        queue.plusAssign("do")
+        queue.plusAssign("stuff")
 
-        val executor = QueueExecutor(queue, bufferSize = 1) { task(it) }
+        val executor = QueueExecutor(queue, bufferSize = 1, task = task)
         executor.executeNow().shouldContainExactly("do")
 
         clock += Duration.ofSeconds(20)
-        queue.poll(10).shouldHaveSize(1)
+        queue.invoke(10).shouldHaveSize(1)
     }
 
     @Test
     fun `executeNow with multiple items in queue and autoDeleteMessage disabled`() {
-        queue.send("do")
-        queue.send("stuff")
+        queue.plusAssign("do")
+        queue.plusAssign("stuff")
 
-        val executor = QueueExecutor(queue, autoDeleteMessage = false) { task(it) }
+        val executor = QueueExecutor(queue, autoDeleteMessages = false, task = task)
         executor.executeNow().shouldContainExactly("do", "stuff")
 
         clock += Duration.ofSeconds(20)
-        queue.poll(10).shouldHaveSize(2)
+        backendQueue.messages.shouldHaveSize(2)
+    }
+
+    @Test
+    fun `override on-batch complete`() {
+        val results = mutableListOf<String>()
+
+        val executor = QueueExecutor(queue, task = task, onBatchComplete = { results += it })
+
+        queue += "lol"
+        queue += "cats"
+        executor.executeNow()
+
+        results.shouldContainExactly("lol", "cats")
     }
 }

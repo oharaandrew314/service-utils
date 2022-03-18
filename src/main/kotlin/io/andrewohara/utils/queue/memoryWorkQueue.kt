@@ -1,40 +1,32 @@
 package io.andrewohara.utils.queue
 
-import java.time.Clock
 import java.time.Duration
-import java.time.Instant
 import java.util.concurrent.ConcurrentLinkedQueue
 
-fun <Message> WorkQueue.Companion.memoryThreadSafe(clock: Clock = Clock.systemUTC(), lockFor: Duration = Duration.ofSeconds(10)) = object: WorkQueue<Message> {
-    val queue = ConcurrentLinkedQueue<Message>()
-    val locks = mutableMapOf<Message, Instant>()
+fun <Message> WorkQueue.Companion.memorySingleReceive() = MemoryWorkQueue<Message>()
 
-    private fun Message.visible(): Boolean {
-        val releaseTime = locks[this] ?: return true
-        return clock.instant() >= releaseTime
+class MemoryWorkQueue<Message>: WorkQueue<Message, MemoryQueueItem<Message>> {
+
+    private val queue = ConcurrentLinkedQueue<MemoryQueueItem<Message>>()
+
+    override fun plusAssign(message: Message) {
+        queue += MemoryQueueItem(message)
     }
 
-    override fun send(message: Message) {
-        queue += message
+    override fun invoke(maxMessages: Int): List<MemoryQueueItem<Message>> {
+        if (maxMessages < 1) return emptyList()
+        return (1..maxMessages).mapNotNull { queue.poll() }
     }
 
-    override fun poll(maxMessages: Int): List<QueueItem<Message>> {
-        return queue.asSequence()
-            .filter { it.visible() }
-            .take(maxMessages)
-            .map { message ->
-                locks[message] = clock.instant() + lockFor
+    override fun minusAssign(items: Collection<MemoryQueueItem<Message>>) {
+        // no-op
+    }
 
-                object: QueueItem<Message> {
-                    override val message = message
-                    override fun delete() {
-                        queue.remove(message)
-                        locks.remove(message)
-                    }
-                    override fun extendLock(duration: Duration) {
-                        locks[message] = clock.instant() + lockFor
-                    }
-                }
-            }.toList()
+    override fun setTimeout(item: MemoryQueueItem<Message>, duration: Duration) {
+        // no-op
     }
 }
+
+data class MemoryQueueItem<Message>(
+    override val message: Message
+): QueueItem<Message>

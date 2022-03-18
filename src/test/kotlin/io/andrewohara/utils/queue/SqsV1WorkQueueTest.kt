@@ -4,13 +4,12 @@ import io.andrewohara.awsmock.sqs.MockSqsV1
 import io.andrewohara.awsmock.sqs.backend.MockSqsBackend
 import io.andrewohara.utils.mappers.ValueMapper
 import io.andrewohara.utils.mappers.string
-import io.andrewohara.utils.queue.SqsV1WorkQueue.Companion.sqsV1
 import java.time.Clock
 import java.time.Duration
 
-class SqsV1WorkQueueTest: AbstractWorkQueueTest() {
+class SqsV1WorkQueueTest: AbstractWorkQueueTest<SqsV1QueueItem<String>>() {
 
-    override fun createQueue(clock: Clock, lockFor: Duration): WorkQueue<String> {
+    override fun createQueue(clock: Clock, lockFor: Duration): WorkQueue<String, SqsV1QueueItem<String>> {
         val sqs = MockSqsBackend(clock)
         val sqsQueue = sqs.create("work", mapOf(
             "VisibilityTimeout" to lockFor.seconds.toString()
