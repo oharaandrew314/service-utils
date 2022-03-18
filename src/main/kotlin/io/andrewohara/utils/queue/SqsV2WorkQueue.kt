@@ -25,7 +25,7 @@ class SqsV2WorkQueue<Message>(
     private val mapper: ValueMapper<Message>,
     private val pollWaitTime: Duration,
     private val deliveryDelay: Duration?,
-): WorkQueue<Message, SqsV2QueueItem<Message>> {
+): WorkQueue<Message> {
 
     companion object {
         private const val maxReceiveCount = 10  // SQS has a limit to the number of messages to receive
@@ -47,11 +47,11 @@ class SqsV2WorkQueue<Message>(
         }
     }
 
-    override fun minusAssign(items: Collection<SqsV2QueueItem<Message>>) {
+    override fun minusAssign(items: Collection<QueueItem<Message>>) {
         sqs.deleteMessageBatch {
             it.queueUrl(url)
             it.entries(
-                items.map { item ->
+                items.filterIsInstance<SqsV2QueueItem<Message>>().map { item ->
                     DeleteMessageBatchRequestEntry.builder()
                         .id(item.messageId)
                         .receiptHandle(item.receiptHandle)
@@ -69,7 +69,9 @@ class SqsV2WorkQueue<Message>(
         }
     }
 
-    override fun setTimeout(item: SqsV2QueueItem<Message>, duration: Duration) {
+    override fun setTimeout(item: QueueItem<Message>, duration: Duration) {
+        if (item !is SqsV2QueueItem<Message>) return
+
         sqs.changeMessageVisibility {
             it.queueUrl(url)
             it.receiptHandle(item.receiptHandle)

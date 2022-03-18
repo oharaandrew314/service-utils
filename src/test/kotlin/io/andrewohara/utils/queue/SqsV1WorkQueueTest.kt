@@ -9,7 +9,7 @@ import java.time.Duration
 
 class SqsV1WorkQueueTest: AbstractWorkQueueTest<SqsV1QueueItem<String>>() {
 
-    override fun createQueue(clock: Clock, lockFor: Duration): WorkQueue<String, SqsV1QueueItem<String>> {
+    override fun createQueue(clock: Clock, lockFor: Duration): WorkQueue<String> {
         val sqs = MockSqsBackend(clock)
         val sqsQueue = sqs.create("work", mapOf(
             "VisibilityTimeout" to lockFor.seconds.toString()

@@ -12,9 +12,9 @@ import java.time.Instant
 abstract class AbstractWorkQueueTest<Item: QueueItem<String>> {
 
     private val clock = MutableFixedClock(Instant.parse("2021-11-19T12:00:00Z"))
-    private lateinit var queue: WorkQueue<String, Item>
+    private lateinit var queue: WorkQueue<String>
 
-    abstract fun createQueue(clock: Clock, lockFor: Duration): WorkQueue<String, Item>
+    abstract fun createQueue(clock: Clock, lockFor: Duration): WorkQueue<String>
 
     @BeforeEach
     fun setup() {

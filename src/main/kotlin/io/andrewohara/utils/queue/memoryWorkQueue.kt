@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 fun <Message> WorkQueue.Companion.memorySingleReceive() = MemoryWorkQueue<Message>()
 
-class MemoryWorkQueue<Message>: WorkQueue<Message, MemoryQueueItem<Message>> {
+class MemoryWorkQueue<Message>: WorkQueue<Message> {
 
     private val queue = ConcurrentLinkedQueue<MemoryQueueItem<Message>>()
 
@@ -18,11 +18,11 @@ class MemoryWorkQueue<Message>: WorkQueue<Message, MemoryQueueItem<Message>> {
         return (1..maxMessages).mapNotNull { queue.poll() }
     }
 
-    override fun minusAssign(items: Collection<MemoryQueueItem<Message>>) {
+    override fun minusAssign(items: Collection<QueueItem<Message>>) {
         // no-op
     }
 
-    override fun setTimeout(item: MemoryQueueItem<Message>, duration: Duration) {
+    override fun setTimeout(item: QueueItem<Message>, duration: Duration) {
         // no-op
     }
 }
