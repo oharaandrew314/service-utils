@@ -3,20 +3,28 @@ package io.andrewohara.utils.queue
 import java.time.Duration
 import java.util.concurrent.*
 
+fun <Message, Result> WorkQueue<Message>.poll(
+    errorHandler: (Throwable) -> Unit = { it.printStackTrace() },
+    bufferSize: Int = 10,
+    task: Task<Message, Result>
+) = QueueExecutor(
+    queue = this,
+    errorHandler = errorHandler,
+    bufferSize = bufferSize,
+    task = task
+)
+
 class QueueExecutor<Message, Result>(
     private val queue: WorkQueue<Message>,
-    private val bufferSize: Int = 10,
-    private val onTaskError: (QueueItem<Message>, Throwable) -> Unit = { _, error -> error.printStackTrace() },
-    private val onPollError: (Throwable) -> Unit = { it.printStackTrace() },
-    private val onBatchComplete: (List<Result>) -> Unit = {},
-    private val task: Task<Message, Result>,
-    private val autoDeleteMessages: Boolean = true
+    private val bufferSize: Int,
+    private val errorHandler: (Throwable) -> Unit,
+    private val task: Task<Message, Result>
 ) {
     fun executeNow(): Collection<Result> {
         val messages = try {
             queue(bufferSize)
         } catch (e: Throwable) {
-            onPollError(e)
+            errorHandler(e)
             emptyList()
         }
 
@@ -25,13 +33,17 @@ class QueueExecutor<Message, Result>(
                 val result = task(item.message) { queue.setTimeout(item, it) }
                 item to result
             } catch (e: Throwable) {
-                onTaskError(item, e)
+                errorHandler(e)
                 null
             }
         }
 
-        onBatchComplete(completed.map { it.second })
-        if (autoDeleteMessages) queue -= completed.map { it.first }
+        try {
+            queue -= completed.map { it.first }
+        } catch (e: Throwable) {
+            errorHandler(e)
+        }
+
         return completed.map { it.second }
     }
 

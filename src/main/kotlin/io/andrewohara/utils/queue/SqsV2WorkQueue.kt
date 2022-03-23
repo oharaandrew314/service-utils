@@ -48,16 +48,18 @@ class SqsV2WorkQueue<Message>(
     }
 
     override fun minusAssign(items: Collection<QueueItem<Message>>) {
+        val entries = items.filterIsInstance<SqsV2QueueItem<Message>>().map { item ->
+            DeleteMessageBatchRequestEntry.builder()
+                .id(item.messageId)
+                .receiptHandle(item.receiptHandle)
+                .build()
+        }
+
+        if (entries.isEmpty()) return
+
         sqs.deleteMessageBatch {
             it.queueUrl(url)
-            it.entries(
-                items.filterIsInstance<SqsV2QueueItem<Message>>().map { item ->
-                    DeleteMessageBatchRequestEntry.builder()
-                        .id(item.messageId)
-                        .receiptHandle(item.receiptHandle)
-                        .build()
-                }
-            )
+            it.entries(entries)
         }
     }
 

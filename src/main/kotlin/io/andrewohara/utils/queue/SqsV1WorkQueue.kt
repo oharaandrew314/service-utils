@@ -57,14 +57,15 @@ class SqsV1WorkQueue<Message>(
     }
 
     override fun minusAssign(items: Collection<QueueItem<Message>>) {
-        sqs.deleteMessageBatch(
-            url,
-            items.filterIsInstance<SqsV1QueueItem<Message>>().map { item ->
-                DeleteMessageBatchRequestEntry()
-                    .withId(item.messageId)
-                    .withReceiptHandle(item.receiptHandle)
-            }
-        )
+        val entries = items.filterIsInstance<SqsV1QueueItem<Message>>().map { item ->
+            DeleteMessageBatchRequestEntry()
+                .withId(item.messageId)
+                .withReceiptHandle(item.receiptHandle)
+        }
+
+        if (entries.isEmpty()) return
+
+        sqs.deleteMessageBatch(url, entries)
     }
 
     override fun setTimeout(item: QueueItem<Message>, duration: Duration) {

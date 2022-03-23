@@ -25,7 +25,7 @@ class QueueExecutorTest {
     }
 
     private val task = Task<String, String> { work, _ -> work }
-    private val executor = QueueExecutor(queue, task = task)
+    private val executor = queue.poll(task = task)
 
     @Test
     fun `executeNow with empty queue`() {
@@ -58,35 +58,10 @@ class QueueExecutorTest {
         queue.plusAssign("do")
         queue.plusAssign("stuff")
 
-        val executor = QueueExecutor(queue, bufferSize = 1, task = task)
+        val executor = queue.poll(bufferSize = 1, task = task)
         executor.executeNow().shouldContainExactly("do")
 
         clock += Duration.ofSeconds(20)
         queue.invoke(10).shouldHaveSize(1)
-    }
-
-    @Test
-    fun `executeNow with multiple items in queue and autoDeleteMessage disabled`() {
-        queue.plusAssign("do")
-        queue.plusAssign("stuff")
-
-        val executor = QueueExecutor(queue, autoDeleteMessages = false, task = task)
-        executor.executeNow().shouldContainExactly("do", "stuff")
-
-        clock += Duration.ofSeconds(20)
-        backendQueue.messages.shouldHaveSize(2)
-    }
-
-    @Test
-    fun `override on-batch complete`() {
-        val results = mutableListOf<String>()
-
-        val executor = QueueExecutor(queue, task = task, onBatchComplete = { results += it })
-
-        queue += "lol"
-        queue += "cats"
-        executor.executeNow()
-
-        results.shouldContainExactly("lol", "cats")
     }
 }
