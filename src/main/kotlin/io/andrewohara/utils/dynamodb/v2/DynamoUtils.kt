@@ -22,6 +22,7 @@ class InstantAsEpochSecondConverter: AttributeConverter<Instant> {
 
 inline fun <reified T> DynamoDbTable<T>.batchPut(client: DynamoDbEnhancedClient, items: Collection<T>, batchSize: Int = DynamoLimits.batchSize) {
     if (items.isEmpty()) return
+    require(batchSize <= DynamoLimits.batchSize) { "Batch size must not exceed DynamoDB limit of ${DynamoLimits.batchSize}"}
 
     val batches = items.chunked(batchSize).map { chunk ->
         WriteBatch.builder(T::class.java).apply {
@@ -32,7 +33,9 @@ inline fun <reified T> DynamoDbTable<T>.batchPut(client: DynamoDbEnhancedClient,
         }.build()
     }
 
-    client.batchWriteItem {
-        it.writeBatches(batches)
+    for (batch in batches) {
+        client.batchWriteItem {
+            it.addWriteBatch(batch)
+        }
     }
 }
