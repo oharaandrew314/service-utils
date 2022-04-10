@@ -48,6 +48,8 @@ class QueueExecutor<Message, Result>(
     }
 
     fun start(workers: Int, interval: Duration? = null): ExecutorHandle {
+        if (workers < 1) return ExecutorHandle {  }
+
         val executor = Executors.newCachedThreadPool()
         repeat(workers) {
             executor.submit {

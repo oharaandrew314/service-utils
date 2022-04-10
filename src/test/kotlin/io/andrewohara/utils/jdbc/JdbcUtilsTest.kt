@@ -1,7 +1,6 @@
 package io.andrewohara.utils.jdbc
 
 import io.kotest.matchers.shouldBe
-import org.h2.jdbcx.JdbcDataSource
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -22,30 +21,16 @@ class JdbcUtilsTest {
         val trills: Boolean?
     )
 
-    private val dataSource = JdbcDataSource().apply {
-        setURL("jdbc:h2:mem:test;MODE=MySQL;DB_CLOSE_DELAY=-1")
-        this.user = "sa"
-        this.password = ""
-    }
-
-    private fun executeScript(resourceName: String) {
-        val content = javaClass.getResourceAsStream(resourceName)!!.reader().readText()
-
-        dataSource.connection.use { conn ->
-            conn.prepareStatement(content).use { stmt ->
-                stmt.executeUpdate()
-            }
-        }
-    }
+    private val dataSource = TestDb()
 
     @BeforeEach
     fun createTables() {
-        executeScript("create-tables.sql")
+        dataSource.executeClassResource("create-tables.sql")
     }
 
     @AfterEach
     fun truncateTables() {
-        executeScript("truncate-tables.sql")
+        dataSource.executeClassResource("truncate-tables.sql")
     }
 
     @Test
