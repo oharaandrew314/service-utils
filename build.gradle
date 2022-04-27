@@ -1,5 +1,5 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.6.20'
+    id 'org.jetbrains.kotlin.jvm' version '1.6.21'
     id 'maven-publish'
     id 'jacoco'
 }
@@ -9,10 +9,8 @@ repositories {
     maven { url 'https://jitpack.io' }
 }
 
-
-
 dependencies {
-    compileOnly platform("org.http4k:http4k-bom:4.14.1.4")
+    compileOnly platform("org.http4k:http4k-bom:4.25.11.0")
     compileOnly platform("com.amazonaws:aws-java-sdk-bom:1.11.817")
     compileOnly platform('software.amazon.awssdk:bom:2.17.85')
 
@@ -31,11 +29,11 @@ dependencies {
     compileOnly "org.http4k:http4k-format-gson"
     compileOnly 'io.split.client:java-client:4.4.2'
     compileOnly group: 'com.zaxxer', name: 'HikariCP', version: '4.0.3'
-    compileOnly 'com.h2database:h2:2.1.210'
+    compileOnly 'com.h2database:h2:2.1.212'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-    testImplementation 'io.kotest:kotest-runner-junit5-jvm:5.2.2'
+    testImplementation 'io.kotest:kotest-runner-junit5-jvm:5.2.3'
     testImplementation group: "org.http4k", name: "http4k-testing-kotest"
     testImplementation 'com.github.oharaandrew314:mock-aws-java-sdk:1.0.0-beta.2'
     testImplementation 'org.slf4j:slf4j-log4j12:2.0.0-alpha5'
@@ -69,16 +67,6 @@ publishing {
             artifact sourcesJar
         }
     }
-}
-
-compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
-    kotlinOptions {
-        languageVersion = "1.5"
-    }
-}
-compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
 }
 
 test {
