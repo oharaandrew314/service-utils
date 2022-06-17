@@ -7,6 +7,16 @@ data class MutableFixedClock(private var time: Instant, private val zone: ZoneId
     override fun withZone(zone: ZoneId) = copy(zone = zone)
     override fun instant() = time
 
+    operator fun plus(duration: Duration): Instant {
+        time += duration
+        return time
+    }
+
+    operator fun minus(duration: Duration): Instant {
+        time -= duration
+        return time
+    }
+
     operator fun plusAssign(duration: Duration) {
         time += duration
     }

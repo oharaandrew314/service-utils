@@ -36,3 +36,13 @@ fun PreparedStatement.setNullableBoolean(position: Int, value: Boolean?, jdbcTyp
         setNull(position, jdbcType)
     }
 }
+
+fun PreparedStatement.setNullableByteArray(position: Int, value: ByteArray?, jdbcType: Int = Types.VARBINARY) {
+    if (value != null) {
+        value.inputStream().use {
+            setBinaryStream(position, it)
+        }
+    } else {
+        setNull(position, jdbcType)
+    }
+}

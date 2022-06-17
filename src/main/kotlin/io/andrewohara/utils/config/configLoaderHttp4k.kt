@@ -1,6 +1,5 @@
 package io.andrewohara.utils.config
 
-import org.http4k.client.JavaHttpClient
 import org.http4k.core.*
 import org.http4k.filter.ClientFilters
 import java.io.IOException

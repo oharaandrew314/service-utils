@@ -9,7 +9,7 @@ import java.io.InputStream
 import java.io.Reader
 
 fun defaultJacksonJson(): JsonMapper = JsonMapper().apply {
-    registerModule(KotlinModule())
+    registerModule(KotlinModule.Builder().build())
     disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
 }
 

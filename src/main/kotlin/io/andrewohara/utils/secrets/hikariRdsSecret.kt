@@ -4,15 +4,22 @@ import java.time.Duration
 import javax.sql.DataSource
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import org.http4k.core.Uri
+import org.http4k.core.query
 
 fun RdsSecret.hikariDataSource(
     minConnections: Int = 1,
     maxConnections: Int = 10,
     idleTimeout: Duration = Duration.ofMinutes(5),
-    leakDetectionThreshold: Duration? = null
+    leakDetectionThreshold: Duration? = null,
+    queryParams: Map<String, String> = emptyMap()
 ): DataSource {
     val config = HikariConfig()
-    config.jdbcUrl = jdbcUri()
+    config.jdbcUrl = Uri.of(jdbcUri()).apply {
+        for ((key, value) in queryParams) {
+            query(key, value)
+        }
+    }.toString()
     config.username = username
     config.password = password
     config.minimumIdle = minConnections

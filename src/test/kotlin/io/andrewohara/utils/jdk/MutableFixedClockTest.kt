@@ -39,4 +39,20 @@ class MutableFixedClockTest {
 
         testObj.instant() shouldBe Instant.parse("2021-01-01T11:00:00Z")
     }
+
+    @Test
+    fun `increment and return time`() {
+        val time = testObj + Duration.ofHours(1)
+
+        time shouldBe Instant.parse("2021-01-01T13:00:00Z")
+        testObj.instant() shouldBe Instant.parse("2021-01-01T13:00:00Z")
+    }
+
+    @Test
+    fun `Decrement and return time`() {
+        val time = testObj - Duration.ofHours(1)
+
+        time shouldBe Instant.parse("2021-01-01T11:00:00Z")
+        testObj.instant() shouldBe Instant.parse("2021-01-01T11:00:00Z")
+    }
 }

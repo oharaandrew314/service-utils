@@ -49,3 +49,5 @@ fun ConfigLoader<ByteArray>.string(charset: Charset = Charsets.UTF_8) = ConfigLo
 fun ConfigLoader.Companion.env() = ConfigLoader { name ->
     System.getenv(name)
 }
+
+fun ConfigLoader.Companion.map(map: Map<String, String>) = ConfigLoader { name -> map[name] }

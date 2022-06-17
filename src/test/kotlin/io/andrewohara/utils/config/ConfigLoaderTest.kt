@@ -166,6 +166,16 @@ class ConfigLoaderTest {
     }
 
     @Test
+    fun `string from map`() {
+        ConfigLoader.map(mapOf("foo" to "bar"))("foo") shouldBe "bar"
+    }
+
+    @Test
+    fun `missing from map`() {
+        ConfigLoader.map(mapOf("foo" to "bar"))("toll").shouldBeNull()
+    }
+
+    @Test
     fun `relative resource`() {
         ConfigLoader.resource(fromClassloader = false).string()("relative.txt") shouldBe "reality"
     }
