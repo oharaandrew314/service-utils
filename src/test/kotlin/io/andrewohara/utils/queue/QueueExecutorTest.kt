@@ -25,7 +25,7 @@ class QueueExecutorTest {
     }
 
     private val task = Task<String, String> { work, _ -> work }
-    private val executor = queue.poll(task = task)
+    private val executor = queue.withWorker(task = task)
 
     @Test
     fun `executeNow with empty queue`() {
@@ -58,7 +58,7 @@ class QueueExecutorTest {
         queue.plusAssign("do")
         queue.plusAssign("stuff")
 
-        val executor = queue.poll(bufferSize = 1, task = task)
+        val executor = queue.withWorker(bufferSize = 1, task = task)
         executor.executeNow().shouldContainExactly("do")
 
         clock += Duration.ofSeconds(20)
