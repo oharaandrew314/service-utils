@@ -1,7 +1,6 @@
 package io.andrewohara.utils.http4k
 
 import io.andrewohara.utils.jdk.toClock
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull
@@ -12,6 +11,7 @@ import org.http4k.filter.ResponseFilters
 import org.http4k.filter.ServerFilters
 import org.http4k.kotest.shouldHaveBody
 import org.http4k.kotest.shouldHaveHeader
+import org.http4k.kotest.shouldHaveStatus
 import org.http4k.kotest.shouldNotHaveHeader
 import org.junit.jupiter.api.Test
 import org.slf4j.helpers.BasicMDCAdapter
@@ -107,9 +107,8 @@ class Slf4jExtensionsTest {
 
     @Test
     fun `log errors`() {
-        shouldThrow<IllegalArgumentException> {
-            ServerFilters.logErrors(logger).then { throw IllegalArgumentException("stuff") }(request)
-        }
+        val server = ServerFilters.logErrors(logger).then { throw IllegalArgumentException("stuff") }
+        server(request) shouldHaveStatus Status.INTERNAL_SERVER_ERROR
         logger.shouldContainExactly("Error during $request")
     }
 

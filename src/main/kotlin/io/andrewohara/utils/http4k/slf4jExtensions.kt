@@ -4,6 +4,7 @@ import org.http4k.appendIfPresent
 import org.http4k.core.Filter
 import org.http4k.core.Request
 import org.http4k.core.Response
+import org.http4k.core.Status
 import org.http4k.filter.ClientFilters
 import org.http4k.filter.ResponseFilters
 import org.http4k.filter.ServerFilters
@@ -79,7 +80,7 @@ fun ServerFilters.logErrors(logger: Logger = LoggerFactory.getLogger("root")) = 
             next(request)
         } catch (e: Throwable) {
             logger.error("Error during $request", e)
-            throw e
+            Response(Status.INTERNAL_SERVER_ERROR).body("Internal Server Error")
         }
     }
 }

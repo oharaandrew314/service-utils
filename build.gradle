@@ -1,5 +1,5 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.6.21'
+    id 'org.jetbrains.kotlin.jvm' version '1.7.0'
     id 'maven-publish'
     id 'jacoco'
 }
@@ -27,13 +27,13 @@ dependencies {
     compileOnly "org.http4k:http4k-format-jackson-yaml"
     compileOnly "org.http4k:http4k-format-moshi"
     compileOnly "org.http4k:http4k-format-gson"
-    compileOnly 'io.split.client:java-client:4.4.2'
+    compileOnly 'io.split.client:java-client:4.4.4'
     compileOnly group: 'com.zaxxer', name: 'HikariCP', version: '4.0.3'
     compileOnly 'com.h2database:h2:2.1.212'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-    testImplementation 'io.kotest:kotest-runner-junit5-jvm:5.2.3'
+    testImplementation 'io.kotest:kotest-runner-junit5-jvm:5.3.1'
     testImplementation group: "org.http4k", name: "http4k-testing-kotest"
     testImplementation 'com.github.oharaandrew314:mock-aws-java-sdk:1.0.0-beta.2'
     testImplementation 'org.slf4j:slf4j-log4j12:2.0.0-alpha5'
