@@ -9,7 +9,14 @@ class MemoryWorkQueueTest {
     private val queue = WorkQueue.memorySingleReceive<String>()
 
     @Test
-    fun `poll empty`() {
+    fun `poll 0 messages`() {
+        queue.plusAssign("foo")
+        queue.plusAssign("bar")
+        queue.invoke(0).shouldBeEmpty()
+    }
+
+    @Test
+    fun `poll empty queue`() {
         queue.invoke(10).shouldBeEmpty()
     }
 

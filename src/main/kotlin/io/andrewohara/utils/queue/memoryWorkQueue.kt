@@ -14,6 +14,7 @@ class MemoryWorkQueue<Message>: WorkQueue<Message> {
     }
 
     override fun invoke(maxMessages: Int): List<MemoryQueueItem<Message>> {
+        if (maxMessages <= 0) return emptyList()
         val results = mutableListOf<MemoryQueueItem<Message>>()
 
         do {
