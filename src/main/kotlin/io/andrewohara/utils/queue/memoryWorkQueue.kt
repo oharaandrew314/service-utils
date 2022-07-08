@@ -14,8 +14,14 @@ class MemoryWorkQueue<Message>: WorkQueue<Message> {
     }
 
     override fun invoke(maxMessages: Int): List<MemoryQueueItem<Message>> {
-        if (maxMessages < 1) return emptyList()
-        return (1..maxMessages).mapNotNull { queue.poll() }
+        val results = mutableListOf<MemoryQueueItem<Message>>()
+
+        do {
+            val next = queue.poll()
+            if (next != null) results += next
+        } while (next != null && results.size < maxMessages)
+
+        return results
     }
 
     override fun minusAssign(items: Collection<QueueItem<Message>>) {
