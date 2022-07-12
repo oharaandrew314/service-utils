@@ -1,5 +1,8 @@
 package io.andrewohara.utils.secrets
 
+import java.sql.Connection
+import java.sql.DriverManager
+
 data class RdsSecret(
     val username: String,
     val password: String,
@@ -13,3 +16,5 @@ data class RdsSecret(
 }
 
 fun RdsSecret.jdbcUri() = "jdbc:$engine://$host/$dbname"
+
+fun RdsSecret.createConnection(): Connection = DriverManager.getConnection(jdbcUri(), username, password)
