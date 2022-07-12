@@ -11,6 +11,7 @@ import org.http4k.filter.ServerFilters
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
+import org.slf4j.event.Level
 import org.slf4j.spi.MDCAdapter
 import java.time.Clock
 import java.time.Duration
@@ -18,6 +19,7 @@ import java.time.Duration
 fun ResponseFilters.logSummary(
     logger: Logger = LoggerFactory.getLogger("root"),
     clock: Clock = Clock.systemUTC(),
+    level: Level = Level.INFO,
     shouldLog: (Request, Response) -> Boolean = { _, _ -> true }
 ) = Filter { next ->
     { request ->
@@ -34,7 +36,7 @@ fun ResponseFilters.logSummary(
                 .appendIfPresent(source, " from $source")
                 .toString()
 
-            logger.info(message)
+            logger.log(level, message)
         }
 
         response
@@ -83,4 +85,12 @@ fun ServerFilters.logErrors(logger: Logger = LoggerFactory.getLogger("root")) = 
             Response(Status.INTERNAL_SERVER_ERROR).body("Internal Server Error")
         }
     }
+}
+
+fun Logger.log(level: Level, message: String, vararg arguments: Any) = when(level) {
+    Level.INFO -> info(message, arguments)
+    Level.ERROR -> error(message, arguments)
+    Level.DEBUG -> debug(message, arguments)
+    Level.TRACE -> trace(message, arguments)
+    Level.WARN -> warn(message, arguments)
 }

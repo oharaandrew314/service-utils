@@ -14,6 +14,7 @@ import org.http4k.kotest.shouldHaveHeader
 import org.http4k.kotest.shouldHaveStatus
 import org.http4k.kotest.shouldNotHaveHeader
 import org.junit.jupiter.api.Test
+import org.slf4j.event.Level
 import org.slf4j.helpers.BasicMDCAdapter
 import java.lang.IllegalArgumentException
 import java.time.Duration
@@ -37,19 +38,27 @@ class Slf4jExtensionsTest {
     private val request = Request(Method.GET, "/")
 
     @Test
-    fun `log response status - should log`() {
+    fun `log summary - should log`() {
         ResponseFilters.logSummary(logger, clock) { _, _ -> true }
             .then(server)(request)
 
-        logger.shouldContainExactly("GET /: 200 OK in 10 ms")
+        logger.shouldContainExactly(LogMessage(Level.INFO, "GET /: 200 OK in 10 ms"))
     }
 
     @Test
-    fun `log response status - should not log`() {
+    fun `log summary - should not log`() {
         ResponseFilters.logSummary(logger, clock) { _, _ -> false }
             .then(server)(request)
 
         logger.shouldBeEmpty()
+    }
+
+    @Test
+    fun `log summary - debug level`() {
+        ResponseFilters.logSummary(logger, clock, level = Level.DEBUG) { _, _ -> true }
+            .then(server)(request)
+
+        logger.shouldContainExactly(LogMessage(Level.DEBUG, "GET /: 200 OK in 10 ms"))
     }
 
     @Test
@@ -109,7 +118,7 @@ class Slf4jExtensionsTest {
     fun `log errors`() {
         val server = ServerFilters.logErrors(logger).then { throw IllegalArgumentException("stuff") }
         server(request) shouldHaveStatus Status.INTERNAL_SERVER_ERROR
-        logger.shouldContainExactly("Error during $request")
+        logger.shouldContainExactly(LogMessage(Level.ERROR, "Error during $request"))
     }
 
     @Test

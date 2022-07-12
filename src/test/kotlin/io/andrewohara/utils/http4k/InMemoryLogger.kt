@@ -4,10 +4,13 @@ import org.slf4j.Marker
 import org.slf4j.event.Level
 import org.slf4j.helpers.AbstractLogger
 
-class InMemoryLogger(val lines: MutableList<String> = mutableListOf()
-): AbstractLogger(), Iterable<String> by lines {
+data class LogMessage(
+    val level: Level,
+    val message: String
+)
 
-    override fun iterator() = lines.iterator()
+class InMemoryLogger(val lines: MutableList<LogMessage> = mutableListOf()
+): AbstractLogger(), Iterable<LogMessage> by lines {
 
     override fun isTraceEnabled() = true
     override fun isTraceEnabled(marker: Marker?) = true
@@ -26,7 +29,7 @@ class InMemoryLogger(val lines: MutableList<String> = mutableListOf()
 
     override fun getFullyQualifiedCallerName() = "qualify this"
 
-    override fun handleNormalizedLoggingCall(level: Level?, marker: Marker?, msg: String, arguments: Array<out Any>?, throwable: Throwable?) {
-        lines += msg
+    override fun handleNormalizedLoggingCall(level: Level, marker: Marker?, msg: String, arguments: Array<out Any>?, throwable: Throwable?) {
+        lines += LogMessage(level, msg)
     }
 }
