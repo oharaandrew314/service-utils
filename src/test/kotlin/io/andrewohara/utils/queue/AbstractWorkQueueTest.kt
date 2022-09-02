@@ -1,6 +1,6 @@
 package io.andrewohara.utils.queue
 
-import io.andrewohara.utils.jdk.MutableFixedClock
+import io.andrewohara.utils.jdk.toClock
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import org.junit.jupiter.api.BeforeEach
@@ -11,7 +11,7 @@ import java.time.Instant
 
 abstract class AbstractWorkQueueTest<Item: QueueItem<String>> {
 
-    private val clock = MutableFixedClock(Instant.parse("2021-11-19T12:00:00Z"))
+    private val clock = Instant.parse("2021-11-19T12:00:00Z").toClock()
     private lateinit var queue: WorkQueue<String>
 
     abstract fun createQueue(clock: Clock, lockFor: Duration): WorkQueue<String>
@@ -24,6 +24,12 @@ abstract class AbstractWorkQueueTest<Item: QueueItem<String>> {
     @Test
     fun `poll empty`() {
         queue.invoke(10).shouldBeEmpty()
+    }
+
+    @Test
+    fun `poll after batch send`() {
+        queue += listOf("foo", "bar")
+        queue.invoke(10) shouldHaveSize 2
     }
 
     @Test

@@ -8,6 +8,7 @@ fun interface ExecutorHandle: (Duration?) -> Unit
 
 interface WorkQueue<Message> {
     operator fun plusAssign(message: Message)
+    operator fun plusAssign(messages: Collection<Message>)
     operator fun invoke(maxMessages: Int): List<QueueItem<Message>>
     operator fun minusAssign(items: Collection<QueueItem<Message>>)
     operator fun minusAssign(item: QueueItem<Message>) = minusAssign(setOf(item))

@@ -13,6 +13,10 @@ class MemoryWorkQueue<Message>: WorkQueue<Message> {
         queue += MemoryQueueItem(message)
     }
 
+    override fun plusAssign(messages: Collection<Message>) {
+        queue += messages.map { MemoryQueueItem(it) }
+    }
+
     override fun invoke(maxMessages: Int): List<MemoryQueueItem<Message>> {
         if (maxMessages <= 0) return emptyList()
         val results = mutableListOf<MemoryQueueItem<Message>>()
