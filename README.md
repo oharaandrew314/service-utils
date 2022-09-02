@@ -16,11 +16,7 @@ Follow the instructions on Jitpack.
 
 - Config Loader
 - Id Generator
-- Http4k Contract UI
 - Http4k Logging Filters
 - Null-safe JDBC PreparedStatement method
 - DynamoDB V1
 - Queue Executor
-
-## TODO
-- multiple OpenApi contracts and UIs
