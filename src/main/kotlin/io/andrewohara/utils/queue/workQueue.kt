@@ -2,8 +2,14 @@ package io.andrewohara.utils.queue
 
 import java.time.Duration
 
-fun interface SetTimeout: (Duration) -> Unit
-fun interface Task<Message, Result>: (Message, SetTimeout) -> Result
+fun interface BatchTask<Message>: (List<QueueItem<Message>>) -> Collection<TaskResult<Message>>
+sealed interface TaskResult<Message> {
+    val item: QueueItem<Message>
+
+    data class Success<Message>(override val item: QueueItem<Message>): TaskResult<Message>
+    data class Failure<Message>(override val item: QueueItem<Message>, val message: String, val throwable: Throwable? = null): TaskResult<Message>
+}
+
 fun interface ExecutorHandle: (Duration?) -> Unit
 
 interface WorkQueue<Message> {
@@ -12,7 +18,6 @@ interface WorkQueue<Message> {
     operator fun invoke(maxMessages: Int): List<QueueItem<Message>>
     operator fun minusAssign(items: Collection<QueueItem<Message>>)
     operator fun minusAssign(item: QueueItem<Message>) = minusAssign(setOf(item))
-    fun setTimeout(item: QueueItem<Message>, duration: Duration)
 
     companion object
 }
@@ -20,4 +25,8 @@ interface WorkQueue<Message> {
 interface QueueItem<Message> {
     val message: Message
 }
+
+typealias TaskErrorHandler<Message> = (TaskResult.Failure<Message>) -> Unit
+
+typealias ErrorHandler = (Throwable) -> Unit
 

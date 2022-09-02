@@ -94,12 +94,6 @@ class SqsV1WorkQueue<Message>(
         sqs.deleteMessageBatch(url, entries)
     }
 
-    override fun setTimeout(item: QueueItem<Message>, duration: Duration) {
-        if (item !is SqsV1QueueItem<Message>) return
-
-        sqs.changeMessageVisibility(url, item.receiptHandle, duration.toSeconds().toInt())
-    }
-
     override fun toString() = "${javaClass.simpleName}: $url"
 }
 

@@ -32,10 +32,6 @@ class MemoryWorkQueue<Message>: WorkQueue<Message> {
     override fun minusAssign(items: Collection<QueueItem<Message>>) {
         // no-op
     }
-
-    override fun setTimeout(item: QueueItem<Message>, duration: Duration) {
-        // no-op
-    }
 }
 
 data class MemoryQueueItem<Message>(

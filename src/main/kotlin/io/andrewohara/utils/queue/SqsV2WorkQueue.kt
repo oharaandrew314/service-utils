@@ -96,16 +96,6 @@ class SqsV2WorkQueue<Message>(
         }
     }
 
-    override fun setTimeout(item: QueueItem<Message>, duration: Duration) {
-        if (item !is SqsV2QueueItem<Message>) return
-
-        sqs.changeMessageVisibility {
-            it.queueUrl(url)
-            it.receiptHandle(item.receiptHandle)
-            it.visibilityTimeout(duration.toSeconds().toInt())
-        }
-    }
-
     override fun toString() = "${javaClass.simpleName}: $url"
 }
 

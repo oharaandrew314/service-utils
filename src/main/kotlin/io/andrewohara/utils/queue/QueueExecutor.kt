@@ -3,51 +3,62 @@ package io.andrewohara.utils.queue
 import java.time.Duration
 import java.util.concurrent.*
 
-fun <Message, Result> WorkQueue<Message>.withWorker(
-    errorHandler: (Throwable) -> Unit = { it.printStackTrace() },
-    taskErrorHandler: (Message, Throwable) -> Unit = { _, e -> errorHandler(e) },
+fun <Message> WorkQueue<Message>.withWorker(
+    errorHandler: ErrorHandler = { it.printStackTrace() },
+    taskErrorHandler: TaskErrorHandler<Message> = { println(it) },
     bufferSize: Int = 10,
-    task: Task<Message, Result>
+    task: (Message) -> Unit
 ) = QueueExecutor(
     queue = this,
     taskErrorHandler = taskErrorHandler,
     errorHandler = errorHandler,
     bufferSize = bufferSize,
-    task = task
-)
-
-class QueueExecutor<Message, Result>(
-    private val queue: WorkQueue<Message>,
-    private val bufferSize: Int = 10,
-    private val errorHandler: (Throwable) -> Unit = { it.printStackTrace() },
-    private val taskErrorHandler: (Message, Throwable) -> Unit = { _, e -> errorHandler(e) },
-    private val task: Task<Message, Result>
-) {
-    fun executeNow(): Collection<Result> {
-        val messages = try {
-            queue(bufferSize)
-        } catch (e: Throwable) {
-            errorHandler(e)
-            emptyList()
-        }
-
-        val completed = messages.mapNotNull { item ->
+    batchTask = { batch ->
+        batch.map { item ->
             try {
-                val result = task(item.message) { queue.setTimeout(item, it) }
-                item to result
+                task(item.message)
+                TaskResult.Success(item)
             } catch (e: Throwable) {
-                taskErrorHandler(item.message, e)
-                null
+                TaskResult.Failure(item, "Unexpected failure", e)
             }
         }
+    }
+)
 
-        try {
-            queue -= completed.map { it.first }
-        } catch (e: Throwable) {
-            errorHandler(e)
+fun <Message> WorkQueue<Message>.withBatchWorker(
+    errorHandler: ErrorHandler = { it.printStackTrace() },
+    taskErrorHandler: TaskErrorHandler<Message> = { println(it) },
+    bufferSize: Int = 10,
+    batchTask: BatchTask<Message>
+) = QueueExecutor(
+    queue = this,
+    taskErrorHandler = taskErrorHandler,
+    errorHandler = errorHandler,
+    bufferSize = bufferSize,
+    batchTask = batchTask
+)
+
+class QueueExecutor<Message>(
+    private val queue: WorkQueue<Message>,
+    private val bufferSize: Int = 10,
+    private val errorHandler: ErrorHandler,
+    private val taskErrorHandler: TaskErrorHandler<Message>,
+    private val batchTask: BatchTask<Message>
+) {
+    operator fun invoke() = try {
+        val messages = queue(bufferSize)
+        val results = batchTask(messages)
+        queue -= results.mapNotNull { result ->
+            when(result) {
+                is TaskResult.Failure<Message> -> {
+                    taskErrorHandler(result)
+                    null
+                }
+                is TaskResult.Success<Message> -> result.item
+            }
         }
-
-        return completed.map { it.second }
+    } catch (e: Throwable) {
+        errorHandler(e)
     }
 
     fun start(workers: Int, interval: Duration? = null): ExecutorHandle {
@@ -57,7 +68,7 @@ class QueueExecutor<Message, Result>(
         repeat(workers) {
             executor.submit {
                 while (!Thread.currentThread().isInterrupted) {
-                    executeNow()
+                    invoke()
                     if (interval != null) {
                         try {
                             Thread.sleep(interval.toMillis())

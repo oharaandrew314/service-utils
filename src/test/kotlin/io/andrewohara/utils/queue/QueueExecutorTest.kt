@@ -8,7 +8,9 @@ import io.andrewohara.utils.mappers.jacksonJson
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
+import java.lang.IllegalArgumentException
 import java.time.Duration
 import java.time.Instant
 
@@ -24,44 +26,76 @@ class QueueExecutorTest {
         WorkQueue.sqsV2<String>(sqs, backendQueue.url, ValueMapper.jacksonJson())
     }
 
-    private val task = Task<String, String> { work, _ -> work }
-    private val executor = queue.withWorker(task = task)
+    private val taskErrors = mutableListOf<TaskResult.Failure<String>>()
+    private val completedTasks = mutableListOf<String>()
+    private val executor = queue.withWorker(
+        taskErrorHandler = { taskErrors += it },
+        task = { completedTasks += it }
+    )
 
     @Test
-    fun `executeNow with empty queue`() {
-        executor.executeNow().shouldBeEmpty()
+    fun `invoke with empty queue`() {
+        executor()
+        completedTasks.shouldBeEmpty()
     }
 
     @Test
-    fun `executeNow with single item in queue`() {
+    fun `invoke with single item in queue`() {
         queue.plusAssign("do")
 
-        executor.executeNow().shouldContainExactly("do")
+        executor()
+        completedTasks.shouldContainExactly("do")
 
         clock += Duration.ofSeconds(20)
         queue.invoke(10).shouldBeEmpty()
     }
 
     @Test
-    fun `executeNow with multiple items in queue`() {
+    fun `invoke with multiple items in queue`() {
         queue.plusAssign("do")
         queue.plusAssign("stuff")
 
-        executor.executeNow().shouldContainExactly("do", "stuff")
+        executor()
+        completedTasks.shouldContainExactly("do", "stuff")
 
         clock += Duration.ofSeconds(20)
         queue.invoke(10).shouldBeEmpty()
     }
 
     @Test
-    fun `executeNow with multiple items in queue and limited buffer size`() {
+    fun `invoke with multiple items in queue and limited buffer size`() {
         queue.plusAssign("do")
         queue.plusAssign("stuff")
 
-        val executor = queue.withWorker(bufferSize = 1, task = task)
-        executor.executeNow().shouldContainExactly("do")
+        queue.withWorker(bufferSize = 1) { work: String ->
+            completedTasks += work
+        }.invoke()
+        completedTasks.shouldContainExactly("do")
 
         clock += Duration.ofSeconds(20)
         queue.invoke(10).shouldHaveSize(1)
+    }
+
+    @Test
+    fun `invoke with failures and successes`() {
+        queue += listOf("foo", "bar")
+
+        queue.withWorker(
+            taskErrorHandler = { taskErrors += it },
+            task = { work: String ->
+                when(work) {
+                    "foo" -> completedTasks += work
+                    else -> throw IllegalArgumentException(work)
+                }
+            }
+        ).invoke()
+
+        completedTasks.shouldContainExactly("foo")
+        taskErrors
+            .shouldHaveSize(1)
+            .map { failure ->
+                failure.throwable shouldBe IllegalArgumentException("bar")
+                failure.message shouldBe "Unexpected failure"
+            }
     }
 }

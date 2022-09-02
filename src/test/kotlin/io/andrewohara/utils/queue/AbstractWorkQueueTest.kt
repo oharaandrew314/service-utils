@@ -72,16 +72,4 @@ abstract class AbstractWorkQueueTest<Item: QueueItem<String>> {
 
         queue.invoke(1).shouldBeEmpty()
     }
-
-    @Test
-    fun `extend message visibility`() {
-        queue.plusAssign("foo")
-        val message = queue.invoke(1).shouldHaveSize(1).first()
-
-        clock += Duration.ofSeconds(5)
-        queue.setTimeout(message, Duration.ofSeconds(10))
-        clock += Duration.ofSeconds(7)
-
-        queue.invoke(1).shouldBeEmpty()
-    }
 }
