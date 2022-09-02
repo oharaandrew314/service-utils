@@ -1,5 +1,5 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.7.0'
+    id 'org.jetbrains.kotlin.jvm' version '1.7.10'
     id 'maven-publish'
     id 'jacoco'
 }
@@ -10,17 +10,21 @@ repositories {
 }
 
 dependencies {
-    compileOnly platform("org.http4k:http4k-bom:4.25.11.0")
-    compileOnly platform("com.amazonaws:aws-java-sdk-bom:1.11.817")
-    compileOnly platform('software.amazon.awssdk:bom:2.17.85')
-
-    compileOnly "org.jetbrains.kotlin:kotlin-stdlib"
-
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '2.0.0-alpha5'
+
+    // aws v1
+    compileOnly platform("com.amazonaws:aws-java-sdk-bom:1.11.817")
     compileOnly group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb'
     compileOnly group: 'com.amazonaws', name: 'aws-java-sdk-sqs'
+
+    // aws v2
+    compileOnly platform('software.amazon.awssdk:bom:2.17.85')
     compileOnly('software.amazon.awssdk:sqs')
     compileOnly('software.amazon.awssdk:dynamodb-enhanced')
+
+    // http4k
+    compileOnly platform("org.http4k:http4k-bom:4.25.11.0")
     compileOnly "org.http4k:http4k-core"
     compileOnly "org.http4k:http4k-contract"
     compileOnly "org.http4k:http4k-format-jackson"
@@ -29,14 +33,15 @@ dependencies {
     compileOnly "org.http4k:http4k-format-gson"
     compileOnly 'io.split.client:java-client:4.4.4'
     compileOnly group: 'com.zaxxer', name: 'HikariCP', version: '4.0.3'
-    compileOnly 'com.h2database:h2:2.1.212'
+    compileOnly 'com.h2database:h2:2.1.214'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-    testImplementation 'io.kotest:kotest-runner-junit5-jvm:5.3.1'
+    testImplementation 'io.kotest:kotest-runner-junit5-jvm:5.4.2'
     testImplementation group: "org.http4k", name: "http4k-testing-kotest"
     testImplementation 'com.github.oharaandrew314:mock-aws-java-sdk:1.0.0-beta.2'
     testImplementation 'org.slf4j:slf4j-log4j12:2.0.0-alpha5'
+    testImplementation("dev.mrbergin:result4k-kotest-matchers:1.0.0")
 }
 
 configurations { // don't want to bundle dependencies in library, but they are needed in tests

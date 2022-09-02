@@ -1,5 +1,6 @@
 package io.andrewohara.utils.jdbc
 
+import io.kotest.matchers.sequences.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -31,6 +32,22 @@ class JdbcUtilsTest {
     @AfterEach
     fun truncateTables() {
         dataSource.executeClassResource("truncate-tables.sql")
+    }
+
+    @Test
+    fun `ResultSet toSequence`() {
+        createCat("Toggles", 1, Instant.parse("2004-06-01T03:33:00Z"), true)
+        createCat("Bandit", 8, Instant.parse("2016-07-01T12:15:00Z"), false)
+
+        dataSource.connection.use { conn ->
+            conn.prepareStatement("SELECT * FROM cats").use { stmt ->
+                stmt.executeQuery().use { rs ->
+                    rs.toSequence()
+                        .map { row -> row.getString("name") }
+                        .shouldContainExactly("Toggles", "Bandit")
+                }
+            }
+        }
     }
 
     @Test

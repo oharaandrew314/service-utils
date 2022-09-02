@@ -1,7 +1,6 @@
 package io.andrewohara.utils.jdbc
 
 import java.sql.ResultSet
-import java.sql.ResultSetMetaData
 import java.time.Instant
 
 fun ResultSet.getStringOrNull(key: String): String? = getString(key)
@@ -18,10 +17,8 @@ inline fun <reified T: Enum<T>> ResultSet.getEnumOrNull(name: String): T? {
     }
 }
 
-fun <T> ResultSet.getResults(converter: (ResultSet) -> T): List<T> {
-    val results = mutableListOf<T>()
+fun ResultSet.toSequence(): Sequence<ResultSet> = sequence {
     while(next()) {
-        results += converter(this)
+        yield(this@toSequence)
     }
-    return results.toList()
 }
