@@ -1,7 +1,8 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.7.10'
+    id 'org.jetbrains.kotlin.jvm' version '1.8.0'
     id 'maven-publish'
     id 'jacoco'
+    id "org.jetbrains.kotlin.plugin.serialization" version "1.8.0"
 }
 
 repositories {
@@ -12,6 +13,8 @@ repositories {
 dependencies {
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '2.0.0-alpha5'
+    compileOnly("dev.forkhandles:values4k:2.3.0.0")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
 
     // aws v1
     compileOnly platform("com.amazonaws:aws-java-sdk-bom:1.11.817")
