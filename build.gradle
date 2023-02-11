@@ -40,7 +40,7 @@ dependencies {
     compileOnly 'io.split.client:java-client:4.4.4'
     compileOnly group: 'com.zaxxer', name: 'HikariCP', version: '4.0.3'
     compileOnly 'com.h2database:h2:2.1.214'
-    implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.16")
+    compileOnly("com.michael-bull.kotlin-result:kotlin-result:1.1.16")
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
