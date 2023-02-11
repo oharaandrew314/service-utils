@@ -11,10 +11,13 @@ repositories {
 }
 
 dependencies {
+
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '2.0.0-alpha5'
-    compileOnly("dev.forkhandles:values4k:2.3.0.0")
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+    compileOnly(platform("dev.forkhandles:forkhandles-bom:2.3.0.0"))
+    compileOnly("dev.forkhandles:values4k")
+    compileOnly("dev.forkhandles:result4k")
 
     // aws v1
     compileOnly platform("com.amazonaws:aws-java-sdk-bom:1.11.817")
@@ -37,6 +40,7 @@ dependencies {
     compileOnly 'io.split.client:java-client:4.4.4'
     compileOnly group: 'com.zaxxer', name: 'HikariCP', version: '4.0.3'
     compileOnly 'com.h2database:h2:2.1.214'
+    implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.16")
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'

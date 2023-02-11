@@ -20,3 +20,6 @@ Follow the instructions on Jitpack.
 - Null-safe JDBC PreparedStatement method
 - DynamoDB V1
 - Queue Executor
+- Kotlinx Serializers for values4k
+- Result4k and Kotlin-Result migration
+- Result4k failIf and recoverIf
