@@ -23,3 +23,4 @@ Follow the instructions on Jitpack.
 - Kotlinx Serializers for values4k
 - Result4k and Kotlin-Result migration
 - Result4k failIf and recoverIf
+- Exposed transforms for nullable columns
