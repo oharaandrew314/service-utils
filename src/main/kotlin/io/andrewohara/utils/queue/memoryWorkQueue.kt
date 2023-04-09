@@ -1,6 +1,5 @@
 package io.andrewohara.utils.queue
 
-import java.time.Duration
 import java.util.concurrent.ConcurrentLinkedQueue
 
 fun <Message> WorkQueue.Companion.memorySingleReceive() = MemoryWorkQueue<Message>()

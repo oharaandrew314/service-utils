@@ -13,7 +13,7 @@ repositories {
 dependencies {
 
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    compileOnly("org.slf4j:slf4j-api:2.0.0-alpha5")
+    compileOnly("org.slf4j:slf4j-api:2.0.7")
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     compileOnly("io.split.client:java-client:4.4.4")
     compileOnly("com.zaxxer:HikariCP:4.0.3")
@@ -31,7 +31,7 @@ dependencies {
     compileOnly("org.jetbrains.exposed:exposed-dao")
 
     // aws v1
-    compileOnly(platform("com.amazonaws:aws-java-sdk-bom:1.11.817"))
+    compileOnly(platform("com.amazonaws:aws-java-sdk-bom:1.12.445"))
     compileOnly("com.amazonaws:aws-java-sdk-dynamodb")
     compileOnly("com.amazonaws:aws-java-sdk-sqs")
 
@@ -52,8 +52,8 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation("io.kotest:kotest-assertions-core-jvm:5.4.2")
     testImplementation("org.http4k:http4k-testing-kotest")
-    testImplementation("com.github.oharaandrew314:mock-aws-java-sdk:1.0.0-beta.2")
-    testImplementation("org.slf4j:slf4j-log4j12:2.0.0-alpha5")
+    testImplementation("com.github.oharaandrew314:mock-aws-java-sdk:1.2.0")
+    testImplementation("org.slf4j:slf4j-log4j12:2.0.7")
     testImplementation("dev.mrbergin:result4k-kotest-matchers:1.0.0")
 }
 

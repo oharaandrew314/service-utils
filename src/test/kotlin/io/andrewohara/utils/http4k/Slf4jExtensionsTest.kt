@@ -82,7 +82,7 @@ class Slf4jExtensionsTest {
 
     @Test
     fun `requestId to MDC - no requestId - log4j`() {
-        val mdc = org.slf4j.log4j12.Log4jMDCAdapter()
+        val mdc = org.slf4j.reload4j.Reload4jMDCAdapter()
         ServerFilters.requestIdToMdc(requestIdName, mdc).then(server)(request)
 
         mdc.get(requestIdName).shouldBeNull()

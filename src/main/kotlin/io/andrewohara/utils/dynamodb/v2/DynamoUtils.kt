@@ -1,6 +1,7 @@
 package io.andrewohara.utils.dynamodb.v2
 
 import software.amazon.awssdk.enhanced.dynamodb.*
+import software.amazon.awssdk.enhanced.dynamodb.model.ReadBatch
 import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import java.time.Instant
@@ -37,5 +38,23 @@ inline fun <reified T> DynamoDbTable<T>.batchPut(client: DynamoDbEnhancedClient,
         client.batchWriteItem {
             it.addWriteBatch(batch)
         }
+    }
+}
+
+inline fun <reified T> DynamoDbTable<T>.batchGet(client: DynamoDbEnhancedClient, keys: Collection<Key>): List<T> {
+    if (keys.isEmpty()) return emptyList()
+    val table = this@batchGet
+
+    val readBatch = keys.map {
+        ReadBatch.builder(T::class.java).apply {
+            mappedTableResource(table)
+            addGetItem(it)
+        }.build()
+    }
+
+    return readBatch.flatMap { batch ->
+        client.batchGetItem {
+            it.addReadBatch(batch)
+        }.resultsForTable(table)
     }
 }
