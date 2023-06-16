@@ -1,7 +1,8 @@
 package io.andrewohara.utils.queue
 
+import io.andrewohara.utils.IdGenerator
 import java.time.Duration
-import java.util.concurrent.*
+import kotlin.concurrent.thread
 
 fun <Message> WorkQueue<Message>.withWorker(
     errorHandler: ErrorHandler = { it.printStackTrace() },
@@ -43,7 +44,8 @@ class QueueExecutor<Message>(
     private val bufferSize: Int = 10,
     private val errorHandler: ErrorHandler,
     private val taskErrorHandler: TaskErrorHandler<Message>,
-    private val batchTask: BatchTask<Message>
+    private val batchTask: BatchTask<Message>,
+    private val name: String = "Executor ${IdGenerator.nextBase36(4)}"
 ) {
     operator fun invoke() = try {
         val messages = queue(bufferSize)
@@ -61,14 +63,17 @@ class QueueExecutor<Message>(
         errorHandler(e)
     }
 
-    fun start(workers: Int, interval: Duration? = null): ExecutorHandle {
-        if (workers < 1) return ExecutorHandle {  }
+    fun start(workers: Int, interval: Duration? = null) {
+        require(workers > 0) { "Cannot start Executor without any workers" }
 
-        val executor = Executors.newCachedThreadPool()
-        repeat(workers) {
-            executor.submit {
+        repeat(workers) { num ->
+            thread(name = "$name-$num") {
                 while (!Thread.currentThread().isInterrupted) {
-                    invoke()
+                    try {
+                        invoke()
+                    } catch (e: Throwable) {
+                        errorHandler(e)
+                    }
                     if (interval != null) {
                         try {
                             Thread.sleep(interval.toMillis())
@@ -80,12 +85,7 @@ class QueueExecutor<Message>(
                 }
             }
         }
-
-        return ExecutorHandle { timeout ->
-            executor.shutdown()
-            if (timeout != null) {
-                executor.awaitTermination(timeout.seconds, TimeUnit.SECONDS)
-            }
-        }
     }
+
+    override fun toString() = name
 }

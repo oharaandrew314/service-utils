@@ -1,7 +1,5 @@
 package io.andrewohara.utils.queue
 
-import java.time.Duration
-
 fun interface BatchTask<Message>: (List<QueueItem<Message>>) -> Collection<TaskResult<Message>>
 sealed interface TaskResult<Message> {
     val item: QueueItem<Message>
@@ -9,8 +7,6 @@ sealed interface TaskResult<Message> {
     data class Success<Message>(override val item: QueueItem<Message>): TaskResult<Message>
     data class Failure<Message>(override val item: QueueItem<Message>, val message: String, val throwable: Throwable? = null): TaskResult<Message>
 }
-
-fun interface ExecutorHandle: (Duration?) -> Unit
 
 interface WorkQueue<Message> {
     operator fun plusAssign(message: Message)

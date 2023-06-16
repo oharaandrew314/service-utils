@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test
 import java.lang.IllegalArgumentException
 import java.time.Duration
 import java.time.Instant
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 class QueueExecutorTest {
 
@@ -97,5 +99,32 @@ class QueueExecutorTest {
                 failure.throwable shouldBe IllegalArgumentException("bar")
                 failure.message shouldBe "Unexpected failure"
             }
+    }
+
+    @Test
+    fun `process queue async`() {
+        val latch = CountDownLatch(2)
+
+        queue += listOf("foo", "bar")
+
+        queue.withWorker { latch.countDown() }.start(1)
+
+        latch.await(5, TimeUnit.SECONDS) shouldBe true
+    }
+
+    @Test
+    fun `process queue batch async`() {
+        val latch = CountDownLatch(2)
+
+        queue += listOf("foo", "bar")
+
+        queue.withBatchWorker { batch ->
+            batch.map { task ->
+                latch.countDown()
+                TaskResult.Success(task)
+            }
+        }.start(1)
+
+        latch.await(5, TimeUnit.SECONDS) shouldBe true
     }
 }
