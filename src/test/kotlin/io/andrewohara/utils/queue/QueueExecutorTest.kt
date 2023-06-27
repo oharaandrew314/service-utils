@@ -31,6 +31,7 @@ class QueueExecutorTest {
     private val taskErrors = mutableListOf<TaskResult.Failure<String>>()
     private val completedTasks = mutableListOf<String>()
     private val executor = queue.withWorker(
+        errorHandler = { throw it },
         taskErrorHandler = { taskErrors += it },
         task = { completedTasks += it }
     )
@@ -69,7 +70,11 @@ class QueueExecutorTest {
         queue.plusAssign("do")
         queue.plusAssign("stuff")
 
-        queue.withWorker(bufferSize = 1) { work: String ->
+        queue.withWorker(
+            errorHandler = { throw it},
+            taskErrorHandler = {error(it)},
+            bufferSize = 1
+        ) { work: String ->
             completedTasks += work
         }.invoke()
         completedTasks.shouldContainExactly("do")
@@ -83,6 +88,7 @@ class QueueExecutorTest {
         queue += listOf("foo", "bar")
 
         queue.withWorker(
+            errorHandler = { throw it },
             taskErrorHandler = { taskErrors += it },
             task = { work: String ->
                 when(work) {
@@ -107,7 +113,10 @@ class QueueExecutorTest {
 
         queue += listOf("foo", "bar")
 
-        queue.withWorker { latch.countDown() }.start(1)
+        queue.withWorker(
+            errorHandler = { throw it },
+            taskErrorHandler = { error(it) }
+        ) { latch.countDown() }.start(1)
 
         latch.await(5, TimeUnit.SECONDS) shouldBe true
     }
@@ -118,7 +127,10 @@ class QueueExecutorTest {
 
         queue += listOf("foo", "bar")
 
-        queue.withBatchWorker { batch ->
+        queue.withBatchWorker(
+            errorHandler = { throw it },
+            taskErrorHandler = { error(it) }
+        ) { batch ->
             batch.map { task ->
                 latch.countDown()
                 TaskResult.Success(task)

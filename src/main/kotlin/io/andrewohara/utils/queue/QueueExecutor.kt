@@ -5,8 +5,8 @@ import java.time.Duration
 import kotlin.concurrent.thread
 
 fun <Message> WorkQueue<Message>.withWorker(
-    errorHandler: ErrorHandler = { it.printStackTrace() },
-    taskErrorHandler: TaskErrorHandler<Message> = { println(it) },
+    errorHandler: ErrorHandler,
+    taskErrorHandler: TaskErrorHandler<Message>,
     bufferSize: Int = 10,
     task: (Message) -> Unit
 ) = QueueExecutor(
@@ -26,9 +26,30 @@ fun <Message> WorkQueue<Message>.withWorker(
     }
 )
 
+fun <Message> WorkQueue<Message>.withWorkerToResult(
+    errorHandler: ErrorHandler,
+    taskErrorHandler: TaskErrorHandler<Message>,
+    bufferSize: Int = 10,
+    task: (Message) -> TaskResult<Message>
+) = QueueExecutor(
+    queue = this,
+    taskErrorHandler = taskErrorHandler,
+    errorHandler = errorHandler,
+    bufferSize = bufferSize,
+    batchTask = { batch ->
+        batch.map { item ->
+            try {
+                task(item.message)
+            } catch (e: Throwable) {
+                TaskResult.Failure(item, "Unexpected failure", e)
+            }
+        }
+    }
+)
+
 fun <Message> WorkQueue<Message>.withBatchWorker(
-    errorHandler: ErrorHandler = { it.printStackTrace() },
-    taskErrorHandler: TaskErrorHandler<Message> = { println(it) },
+    errorHandler: ErrorHandler,
+    taskErrorHandler: TaskErrorHandler<Message>,
     bufferSize: Int = 10,
     batchTask: BatchTask<Message>
 ) = QueueExecutor(
