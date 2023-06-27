@@ -1,12 +1,11 @@
 package io.andrewohara.utils.dynamodb.v2
 
 import io.andrewohara.awsmock.dynamodb.MockDynamoDbV2
-import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import org.http4k.core.Uri
 import org.junit.jupiter.api.Test
-import software.amazon.awssdk.enhanced.dynamodb.AttributeValueType
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
 import software.amazon.awssdk.enhanced.dynamodb.Key
 import software.amazon.awssdk.enhanced.dynamodb.mapper.BeanTableSchema
@@ -42,7 +41,7 @@ class DynamoV2Test {
     fun `batch put`() {
         val kitties = (1..100).map { DynamoV2Cat(it, "cat$it") }
 
-        table.batchPut(enhanced, kitties)
+        enhanced.batchPut(table, kitties)
 
         table.scan().items().toList().shouldContainExactlyInAnyOrder(kitties)
     }
@@ -54,7 +53,17 @@ class DynamoV2Test {
 
         val keys = kitties.map { Key.builder().partitionValue(it.id).build() }
 
-        table.batchGet(enhanced, keys).shouldContainExactlyInAnyOrder(kitties)
+        enhanced.batchGet(table, keys).shouldContainExactlyInAnyOrder(kitties)
+    }
+
+    @Test
+    fun `batch delete`() {
+        val kitties = (1..100).map { DynamoV2Cat(it, "cat$it") }
+        kitties.forEach { table.putItem(it) }
+
+        enhanced.batchDelete(table, kitties.map { Key.builder().partitionValue(it.id).build() })
+
+        table.scan().items().shouldBeEmpty()
     }
 
     @Test
