@@ -30,7 +30,7 @@ fun <Message> WorkQueue<Message>.withWorkerToResult(
     errorHandler: ErrorHandler,
     taskErrorHandler: TaskErrorHandler<Message>,
     bufferSize: Int = 10,
-    task: (Message) -> TaskResult<Message>
+    task: (QueueItem<Message>) -> TaskResult<Message>
 ) = QueueExecutor(
     queue = this,
     taskErrorHandler = taskErrorHandler,
@@ -39,7 +39,7 @@ fun <Message> WorkQueue<Message>.withWorkerToResult(
     batchTask = { batch ->
         batch.map { item ->
             try {
-                task(item.message)
+                task(item)
             } catch (e: Throwable) {
                 TaskResult.Failure(item, "Unexpected failure", e)
             }

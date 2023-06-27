@@ -139,4 +139,31 @@ class QueueExecutorTest {
 
         latch.await(5, TimeUnit.SECONDS) shouldBe true
     }
+
+    @Test
+    fun `process queue with worker that returns result`() {
+        queue += listOf("foo", "bar")
+
+        queue.withWorkerToResult(
+            errorHandler = { throw it },
+            taskErrorHandler = { taskErrors += it },
+            task = { work: QueueItem<String> ->
+                when(work.message) {
+                    "foo" -> {
+                        completedTasks += work.message
+                        TaskResult.Success(work)
+                    }
+                    else -> TaskResult.Failure(work, "bad")
+                }
+            }
+        ).invoke()
+
+        completedTasks.shouldContainExactly("foo")
+        taskErrors
+            .shouldHaveSize(1)
+            .map { failure ->
+                failure.throwable shouldBe null
+                failure.message shouldBe "bad"
+            }
+    }
 }
