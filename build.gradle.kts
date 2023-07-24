@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "1.8.10"
-    kotlin("plugin.serialization") version "1.8.10"
+    kotlin("jvm") version "1.9.0"
+    kotlin("plugin.serialization") version "1.9.0"
     id("maven-publish")
     id("jacoco")
 }
@@ -21,7 +21,7 @@ dependencies {
     compileOnly("com.michael-bull.kotlin-result:kotlin-result:1.1.16")
 
     //forKHandles
-    compileOnly(platform("dev.forkhandles:forkhandles-bom:2.3.0.0"))
+    compileOnly(platform("dev.forkhandles:forkhandles-bom:2.6.0.0"))
     compileOnly("dev.forkhandles:values4k")
     compileOnly("dev.forkhandles:result4k")
 
@@ -49,12 +49,17 @@ dependencies {
     compileOnly("org.http4k:http4k-format-moshi")
     compileOnly("org.http4k:http4k-format-gson")
 
+    // http4k-connect
+    compileOnly(platform("org.http4k:http4k-connect-bom:5.1.4.0"))
+    compileOnly("org.http4k:http4k-connect-amazon-sqs")
+
     testImplementation(kotlin("test"))
     testImplementation("io.kotest:kotest-assertions-core-jvm:5.4.2")
     testImplementation("org.http4k:http4k-testing-kotest")
     testImplementation("com.github.oharaandrew314:mock-aws-java-sdk:1.2.0")
     testImplementation("org.slf4j:slf4j-log4j12:2.0.7")
-    testImplementation("dev.mrbergin:result4k-kotest-matchers:1.0.0")
+    testImplementation("dev.forkhandles:result4k-kotest")
+    testImplementation("org.http4k:http4k-connect-amazon-sqs-fake")
 }
 
 configurations { // don't want to bundle dependencies in library, but they are needed in tests

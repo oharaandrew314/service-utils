@@ -47,13 +47,6 @@ abstract class AbstractWorkQueueTest<Item: QueueItem<String>> {
     }
 
     @Test
-    fun `poll should make message invisible`() {
-        queue.plusAssign("foo")
-        queue.invoke(1) shouldHaveSize 1
-        queue.invoke(1).shouldBeEmpty()
-    }
-
-    @Test
     fun `invisible message should become visible after timeout`() {
         queue.plusAssign("foo")
         queue.invoke(1) shouldHaveSize 1

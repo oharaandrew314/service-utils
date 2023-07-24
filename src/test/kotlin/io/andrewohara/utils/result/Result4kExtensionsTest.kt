@@ -2,8 +2,8 @@ package io.andrewohara.utils.result
 
 import dev.forkhandles.result4k.Failure
 import dev.forkhandles.result4k.Success
-import dev.mrbergin.kotest.result4k.shouldBeFailure
-import dev.mrbergin.kotest.result4k.shouldBeSuccess
+import dev.forkhandles.result4k.kotest.shouldBeFailure
+import dev.forkhandles.result4k.kotest.shouldBeSuccess
 import org.junit.jupiter.api.Test
 
 class RecoverIfTests {
