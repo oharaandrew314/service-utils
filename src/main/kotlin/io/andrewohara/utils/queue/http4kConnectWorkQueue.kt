@@ -1,55 +1,57 @@
 package io.andrewohara.utils.queue
 
 import dev.forkhandles.result4k.onFailure
-import io.andrewohara.utils.mappers.ValueMapper
 import org.http4k.connect.amazon.sqs.SQS
+import org.http4k.connect.amazon.sqs.action.SendMessageBatchEntry
 import org.http4k.connect.amazon.sqs.deleteMessageBatch
 import org.http4k.connect.amazon.sqs.model.ReceiptHandle
 import org.http4k.connect.amazon.sqs.model.SQSMessageId
 import org.http4k.connect.amazon.sqs.receiveMessage
 import org.http4k.connect.amazon.sqs.sendMessage
+import org.http4k.connect.amazon.sqs.sendMessageBatch
 import org.http4k.core.Uri
+import org.http4k.format.AutoMarshalling
 import java.time.Duration
+import kotlin.reflect.KClass
 
-fun <Message> WorkQueue.Companion.http4k(
+private const val MAX_RECEIVE_COUNT = 10  // SQS has a limit to the number of messages to receive
+
+inline fun <reified Message: Any> WorkQueue.Companion.http4k(
     sqs: SQS,
     url: Uri,
-    mapper: ValueMapper<Message>,
+    marshaller: AutoMarshalling,
     pollWaitTime: Duration = Duration.ofSeconds(20),
     deliveryDelay: Duration? =  null,
 ) = Http4kConnectWorkQueue(
     sqs = sqs,
     url = url,
-    mapper = mapper,
+    marshaller = marshaller,
     pollWaitTime = pollWaitTime,
-    deliveryDelay = deliveryDelay
+    deliveryDelay = deliveryDelay,
+    type = Message::class
 )
 
-class Http4kConnectWorkQueue<Message>(
+class Http4kConnectWorkQueue<Message: Any>(
     private val sqs: SQS,
     private val url: Uri,
-    private val mapper: ValueMapper<Message>,
+    private val marshaller: AutoMarshalling,
     private val pollWaitTime: Duration,
     private val deliveryDelay: Duration?,
+    private val type: KClass<Message>
 ): WorkQueue<Message> {
-
-    companion object {
-        private const val maxReceiveCount = 10  // SQS has a limit to the number of messages to receive
-//        private const val maxBatchSize = 10
-    }
 
     override fun invoke(maxMessages: Int): List<Http4kConnectWorkQueueItem<Message>> {
         val messages = sqs.receiveMessage(
             queueUrl = url,
-            maxNumberOfMessages = maxMessages.coerceAtMost(maxReceiveCount) ,
+            maxNumberOfMessages = maxMessages.coerceAtMost(MAX_RECEIVE_COUNT) ,
             longPollTime = pollWaitTime
         ).onFailure { it.reason.throwIt() }
 
 
-        return messages.mapNotNull { message ->
+        return messages.map { message ->
             Http4kConnectWorkQueueItem(
                 messageId = message.messageId,
-                message = mapper.read(message.body) ?: return@mapNotNull null,
+                message = marshaller.asA(message.body, type),
                 receiptHandle = message.receiptHandle
             )
         }
@@ -68,13 +70,22 @@ class Http4kConnectWorkQueue<Message>(
     override fun plusAssign(message: Message) {
         sqs.sendMessage(
             queueUrl = url,
-            payload = mapper.write(message),
+            payload = marshaller.asFormatString(message),
             delaySeconds = deliveryDelay?.toSeconds()?.toInt()
         )
     }
 
     override fun plusAssign(messages: Collection<Message>) {
-        messages.forEach(::plusAssign) // TODO batch
+        sqs.sendMessageBatch(
+            queueUrl = url,
+            entries = messages.mapIndexed { index, message ->
+                SendMessageBatchEntry(
+                    id = index.toString(),
+                    payload = marshaller.asFormatString(message),
+                    delaySeconds = deliveryDelay?.toSeconds()?.toInt()
+                )
+            }
+        )
     }
 
     override fun toString() = "${javaClass.simpleName}: $url"

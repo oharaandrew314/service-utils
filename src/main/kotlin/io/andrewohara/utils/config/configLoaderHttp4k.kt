@@ -2,6 +2,7 @@ package io.andrewohara.utils.config
 
 import org.http4k.core.*
 import org.http4k.filter.ClientFilters
+import org.http4k.format.AutoMarshalling
 import java.io.IOException
 
 fun ConfigLoader.Companion.http4k(backend: HttpHandler) = ConfigLoader { name ->
@@ -22,3 +23,9 @@ fun ConfigLoader.Companion.http4k(
     baseUri: Uri,
     backend: HttpHandler
 ) = http4k(ClientFilters.SetBaseUriFrom(baseUri).then(backend))
+
+inline fun <reified T> ConfigLoader<ByteArray>.mapped(marshaller: AutoMarshalling) = ConfigLoader<T> { name ->
+    this(name)?.inputStream()?.use { stream ->
+        marshaller.asA(stream)
+    }
+}

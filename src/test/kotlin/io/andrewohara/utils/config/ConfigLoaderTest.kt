@@ -1,6 +1,5 @@
 package io.andrewohara.utils.config
 
-import io.andrewohara.utils.mappers.*
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -67,28 +66,8 @@ class ConfigLoaderTest {
     }
 
     @Test
-    fun `jackson json`() {
-        ConfigLoader.resource().jacksonJson<Config>()("config.json") shouldBe Config()
-    }
-
-    @Test
-    fun `moshi json`() {
-        ConfigLoader.resource().moshi<Config>()("config.json") shouldBe Config()
-    }
-
-    @Test
-    fun `gson json`() {
-        ConfigLoader.resource().gson<Config>()("config.json") shouldBe Config()
-    }
-
-    @Test
-    fun `jackson yaml`() {
-        ConfigLoader.resource().jacksonYaml<Config>()("config.json") shouldBe Config()
-    }
-
-    @Test
     fun `http4k jackson`() {
-        ConfigLoader.resource().http4k<Config>(Jackson)("config.json") shouldBe Config()
+        ConfigLoader.resource().mapped<Config>(Jackson)("config.json") shouldBe Config()
     }
 
     @Test

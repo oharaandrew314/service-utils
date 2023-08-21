@@ -1,13 +1,12 @@
 package io.andrewohara.utils.queue
 
-import io.andrewohara.utils.mappers.ValueMapper
-import io.andrewohara.utils.mappers.jacksonJson
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import org.http4k.aws.AwsSdkClient
 import org.http4k.connect.amazon.sqs.FakeSQS
+import org.http4k.format.Jackson
 import org.junit.jupiter.api.Test
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.services.sqs.SqsClient
@@ -27,7 +26,7 @@ class QueueExecutorTest {
             it.queueName("test")
         }.queueUrl()
 
-        WorkQueue.sqsV2<String>(sqs, url, ValueMapper.jacksonJson())
+        WorkQueue.sqsV2<String>(sqs, url, Jackson)
     }
 
     private val taskErrors = mutableListOf<TaskResult.Failure<String>>()

@@ -1,6 +1,5 @@
 package io.andrewohara.utils.config
 
-import io.andrewohara.utils.mappers.ValueMapper
 import java.lang.IllegalArgumentException
 import java.nio.charset.Charset
 import java.nio.file.Files
@@ -36,10 +35,6 @@ fun ConfigLoader<ByteArray>.properties() = ConfigLoader { name ->
             load(it)
         }
     }
-}
-
-fun <T> ConfigLoader<ByteArray>.mapper(mapper: ValueMapper<T>) = ConfigLoader { name ->
-    this(name)?.let { mapper.read(it) }
 }
 
 fun ConfigLoader<ByteArray>.string(charset: Charset = Charsets.UTF_8) = ConfigLoader { name ->

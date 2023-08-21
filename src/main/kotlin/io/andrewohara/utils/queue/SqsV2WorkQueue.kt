@@ -1,50 +1,51 @@
 package io.andrewohara.utils.queue
 
-import io.andrewohara.utils.mappers.ValueMapper
+import org.http4k.format.AutoMarshalling
 import software.amazon.awssdk.services.sqs.SqsClient
 import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchRequestEntry
 import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequestEntry
 import java.io.IOException
 import java.time.Duration
+import kotlin.reflect.KClass
 
-fun <Message> WorkQueue.Companion.sqsV2(
+private const val MAX_RECEIVE_COUNT = 10  // SQS has a limit to the number of messages to receive
+private const val MAX_BATCH_SIZE = 10
+
+inline fun <reified Message: Any> WorkQueue.Companion.sqsV2(
     sqs: SqsClient,
     url: String,
-    mapper: ValueMapper<Message>,
+    marshaller: AutoMarshalling,
     pollWaitTime: Duration = Duration.ofSeconds(20),
     deliveryDelay: Duration? =  null,
 ) = SqsV2WorkQueue(
     sqs = sqs,
     url = url,
-    mapper = mapper,
+    marshaller = marshaller,
     pollWaitTime = pollWaitTime,
-    deliveryDelay = deliveryDelay
+    deliveryDelay = deliveryDelay,
+    type = Message::class
 )
 
-class SqsV2WorkQueue<Message>(
+class SqsV2WorkQueue<Message: Any>(
     private val sqs: SqsClient,
     private val url: String,
-    private val mapper: ValueMapper<Message>,
+    private val marshaller: AutoMarshalling,
     private val pollWaitTime: Duration,
     private val deliveryDelay: Duration?,
+    private val type: KClass<Message>
 ): WorkQueue<Message> {
-
-    companion object {
-        private const val maxReceiveCount = 10  // SQS has a limit to the number of messages to receive
-        private const val maxBatchSize = 10
-    }
 
     override fun invoke(maxMessages: Int): List<SqsV2QueueItem<Message>> {
         val response = sqs.receiveMessage {
             it.queueUrl(url)
-            it.maxNumberOfMessages(maxMessages.coerceAtMost(maxReceiveCount))
+            it.maxNumberOfMessages(maxMessages.coerceAtMost(MAX_RECEIVE_COUNT))
             it.waitTimeSeconds(pollWaitTime.toSeconds().toInt())
         }
 
         return response.messages().mapNotNull { message ->
             SqsV2QueueItem(
                 messageId = message.messageId(),
-                message = mapper.read(message.body()) ?: return@mapNotNull null,
+                message = marshaller.asA(message.body(), type),
                 receiptHandle = message.receiptHandle()
             )
         }
@@ -69,20 +70,20 @@ class SqsV2WorkQueue<Message>(
     override fun plusAssign(message: Message) {
         sqs.sendMessage {
             it.queueUrl(url)
-            it.messageBody(mapper.write(message))
+            it.messageBody(marshaller.asFormatString(message))
             it.delaySeconds(deliveryDelay?.toSeconds()?.toInt())
         }
     }
 
     override fun plusAssign(messages: Collection<Message>) {
-        for (batch in messages.chunked(maxBatchSize)) {
+        for (batch in messages.chunked(MAX_BATCH_SIZE)) {
             val entries = batch
                 .withIndex()
                 .map { (index, message) ->
                     SendMessageBatchRequestEntry.builder()
                         .id(index.toString())
                         .delaySeconds(deliveryDelay?.toSeconds()?.toInt())
-                        .messageBody(mapper.write(message))
+                        .messageBody(marshaller.asFormatString(message))
                         .build()
                 }
 
