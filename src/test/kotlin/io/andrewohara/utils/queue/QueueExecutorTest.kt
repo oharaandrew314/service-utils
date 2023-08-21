@@ -1,31 +1,33 @@
 package io.andrewohara.utils.queue
 
-import io.andrewohara.awsmock.sqs.MockSqsV2
-import io.andrewohara.awsmock.sqs.backend.MockSqsBackend
-import io.andrewohara.utils.jdk.MutableFixedClock
 import io.andrewohara.utils.mappers.ValueMapper
 import io.andrewohara.utils.mappers.jacksonJson
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import org.http4k.aws.AwsSdkClient
+import org.http4k.connect.amazon.sqs.FakeSQS
 import org.junit.jupiter.api.Test
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
+import software.amazon.awssdk.services.sqs.SqsClient
 import java.lang.IllegalArgumentException
-import java.time.Duration
-import java.time.Instant
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 class QueueExecutorTest {
 
-    private val clock = MutableFixedClock(Instant.parse("2021-11-19T12:00:00Z"))
-
-    private val sqsBackend = MockSqsBackend(clock)
-    private val backendQueue = sqsBackend.create("test")!!
-
     private val queue = let {
-        val sqs = MockSqsV2(sqsBackend)
-        WorkQueue.sqsV2<String>(sqs, backendQueue.url, ValueMapper.jacksonJson())
+        val sqs = SqsClient.builder()
+            .httpClient(AwsSdkClient(FakeSQS()))
+            .credentialsProvider { AwsBasicCredentials.create("id", "secret") }
+            .build()
+
+        val url = sqs.createQueue {
+            it.queueName("test")
+        }.queueUrl()
+
+        WorkQueue.sqsV2<String>(sqs, url, ValueMapper.jacksonJson())
     }
 
     private val taskErrors = mutableListOf<TaskResult.Failure<String>>()
@@ -49,7 +51,6 @@ class QueueExecutorTest {
         executor()
         completedTasks.shouldContainExactly("do")
 
-        clock += Duration.ofSeconds(20)
         queue.invoke(10).shouldBeEmpty()
     }
 
@@ -61,7 +62,6 @@ class QueueExecutorTest {
         executor()
         completedTasks.shouldContainExactly("do", "stuff")
 
-        clock += Duration.ofSeconds(20)
         queue.invoke(10).shouldBeEmpty()
     }
 
@@ -79,7 +79,6 @@ class QueueExecutorTest {
         }.invoke()
         completedTasks.shouldContainExactly("do")
 
-        clock += Duration.ofSeconds(20)
         queue.invoke(10).shouldHaveSize(1)
     }
 

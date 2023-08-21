@@ -1,17 +1,20 @@
 package io.andrewohara.utils.dynamodb.v2
 
-import io.andrewohara.awsmock.dynamodb.MockDynamoDbV2
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
+import org.http4k.aws.AwsSdkClient
+import org.http4k.connect.amazon.dynamodb.FakeDynamoDb
 import org.http4k.core.Uri
 import org.junit.jupiter.api.Test
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient
 import software.amazon.awssdk.enhanced.dynamodb.Key
 import software.amazon.awssdk.enhanced.dynamodb.mapper.BeanTableSchema
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbConvertedBy
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import java.time.Instant
 
@@ -28,7 +31,10 @@ data class DynamoV2Cat(
 )
 
 class DynamoV2Test {
-    private val dynamo = MockDynamoDbV2()
+    private val dynamo = DynamoDbClient.builder()
+        .httpClient(AwsSdkClient(FakeDynamoDb()))
+        .credentialsProvider { AwsBasicCredentials.create("id", "secret") }
+        .build()
 
     private val enhanced = DynamoDbEnhancedClient.builder()
         .dynamoDbClient(dynamo)

@@ -12,7 +12,7 @@ repositories {
 
 dependencies {
 
-    compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    compileOnly(kotlin("stdlib"))
     compileOnly("org.slf4j:slf4j-api:2.0.7")
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     compileOnly("io.split.client:java-client:4.4.4")
@@ -30,11 +30,6 @@ dependencies {
     compileOnly("org.jetbrains.exposed:exposed-jdbc")
     compileOnly("org.jetbrains.exposed:exposed-dao")
 
-    // aws v1
-    compileOnly(platform("com.amazonaws:aws-java-sdk-bom:1.12.445"))
-    compileOnly("com.amazonaws:aws-java-sdk-dynamodb")
-    compileOnly("com.amazonaws:aws-java-sdk-sqs")
-
     // aws v2
     compileOnly(platform("software.amazon.awssdk:bom:2.17.85"))
     compileOnly("software.amazon.awssdk:sqs")
@@ -50,16 +45,16 @@ dependencies {
     compileOnly("org.http4k:http4k-format-gson")
 
     // http4k-connect
-    compileOnly(platform("org.http4k:http4k-connect-bom:5.1.4.0"))
+    compileOnly(platform("org.http4k:http4k-connect-bom:5.1.5.0"))
     compileOnly("org.http4k:http4k-connect-amazon-sqs")
 
     testImplementation(kotlin("test"))
     testImplementation("io.kotest:kotest-assertions-core-jvm:5.4.2")
     testImplementation("org.http4k:http4k-testing-kotest")
-    testImplementation("com.github.oharaandrew314:mock-aws-java-sdk:1.2.0")
     testImplementation("org.slf4j:slf4j-log4j12:2.0.7")
     testImplementation("dev.forkhandles:result4k-kotest")
     testImplementation("org.http4k:http4k-connect-amazon-sqs-fake")
+    testImplementation("org.http4k:http4k-connect-amazon-dynamodb-fake")
 }
 
 configurations { // don't want to bundle dependencies in library, but they are needed in tests
