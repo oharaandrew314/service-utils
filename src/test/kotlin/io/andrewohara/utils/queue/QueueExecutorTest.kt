@@ -9,6 +9,7 @@ import org.http4k.connect.amazon.sqs.FakeSQS
 import org.http4k.format.Jackson
 import org.junit.jupiter.api.Test
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
+import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.sqs.SqsClient
 import java.lang.IllegalArgumentException
 import java.util.concurrent.CountDownLatch
@@ -20,6 +21,7 @@ class QueueExecutorTest {
         val sqs = SqsClient.builder()
             .httpClient(AwsSdkClient(FakeSQS()))
             .credentialsProvider { AwsBasicCredentials.create("id", "secret") }
+            .region(Region.CA_CENTRAL_1)
             .build()
 
         val url = sqs.createQueue {

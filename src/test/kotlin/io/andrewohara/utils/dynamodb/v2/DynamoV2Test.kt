@@ -14,6 +14,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.BeanTableSchema
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbConvertedBy
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey
+import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import java.time.Instant
@@ -34,6 +35,7 @@ class DynamoV2Test {
     private val dynamo = DynamoDbClient.builder()
         .httpClient(AwsSdkClient(FakeDynamoDb()))
         .credentialsProvider { AwsBasicCredentials.create("id", "secret") }
+        .region(Region.CA_CENTRAL_1)
         .build()
 
     private val enhanced = DynamoDbEnhancedClient.builder()
