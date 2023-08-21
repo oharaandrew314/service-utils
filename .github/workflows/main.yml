@@ -45,4 +45,4 @@ jobs:
           distribution: ${{ matrix.distribution }}
 
       - name: Test
-        run: sh ./gradlew check --stracktrace --debug
+        run: sh ./gradlew check --stacktrace
