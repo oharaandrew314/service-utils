@@ -18,7 +18,6 @@ Follow the instructions on Jitpack.
 - Id Generator
 - Http4k Logging Filters
 - Null-safe JDBC PreparedStatement method
-- DynamoDB V1
 - Queue Executor
 - Kotlinx Serializers for values4k
 - Result4k and Kotlin-Result migration
