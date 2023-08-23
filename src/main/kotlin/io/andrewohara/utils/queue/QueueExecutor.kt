@@ -2,21 +2,21 @@ package io.andrewohara.utils.queue
 
 import io.andrewohara.utils.IdGenerator
 import java.time.Duration
-import java.util.concurrent.Executor
 import java.util.concurrent.Executors
+import java.util.concurrent.ThreadFactory
 
 fun <Message> WorkQueue<Message>.withWorker(
     errorHandler: ErrorHandler,
     taskErrorHandler: TaskErrorHandler<Message>,
     bufferSize: Int = 10,
-    executor: Executor = Executors.newCachedThreadPool(),
+    threadFactory: ThreadFactory = Executors.defaultThreadFactory(),
     task: (Message) -> Unit
 ) = QueueExecutor(
     queue = this,
     taskErrorHandler = taskErrorHandler,
     errorHandler = errorHandler,
     bufferSize = bufferSize,
-    executor = executor,
+    threadFactory = threadFactory,
     batchTask = { batch ->
         batch.map { item ->
             try {
@@ -33,14 +33,14 @@ fun <Message> WorkQueue<Message>.withWorkerToResult(
     errorHandler: ErrorHandler,
     taskErrorHandler: TaskErrorHandler<Message>,
     bufferSize: Int = 10,
-    executor: Executor = Executors.newCachedThreadPool(),
+    threadFactory: ThreadFactory = Executors.defaultThreadFactory(),
     task: (QueueItem<Message>) -> TaskResult<Message>
 ) = QueueExecutor(
     queue = this,
     taskErrorHandler = taskErrorHandler,
     errorHandler = errorHandler,
     bufferSize = bufferSize,
-    executor = executor,
+    threadFactory = threadFactory,
     batchTask = { batch ->
         batch.map { item ->
             try {
@@ -56,7 +56,7 @@ fun <Message> WorkQueue<Message>.withBatchWorker(
     errorHandler: ErrorHandler,
     taskErrorHandler: TaskErrorHandler<Message>,
     bufferSize: Int = 10,
-    executor: Executor = Executors.newCachedThreadPool(),
+    threadFactory: ThreadFactory = Executors.defaultThreadFactory(),
     batchTask: BatchTask<Message>
 ) = QueueExecutor(
     queue = this,
@@ -64,7 +64,7 @@ fun <Message> WorkQueue<Message>.withBatchWorker(
     errorHandler = errorHandler,
     bufferSize = bufferSize,
     batchTask = batchTask,
-    executor = executor
+    threadFactory = threadFactory
 )
 
 class QueueExecutor<Message>(
@@ -74,7 +74,7 @@ class QueueExecutor<Message>(
     private val taskErrorHandler: TaskErrorHandler<Message>,
     private val batchTask: BatchTask<Message>,
     private val name: String = "Executor ${IdGenerator.nextBase36(4)}",
-    private val executor: Executor
+    private val threadFactory: ThreadFactory
 ) {
     operator fun invoke() = try {
         val messages = queue(bufferSize)
@@ -96,7 +96,7 @@ class QueueExecutor<Message>(
         require(workers > 0) { "Cannot start Executor without any workers" }
 
         repeat(workers) {
-            executor.execute {
+            threadFactory.newThread {
                 while (!Thread.currentThread().isInterrupted) {
                     try {
                         invoke()
@@ -112,7 +112,7 @@ class QueueExecutor<Message>(
                         }
                     }
                 }
-            }
+            }.start()
         }
     }
 
