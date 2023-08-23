@@ -1,14 +1,17 @@
-package io.andrewohara.utils.secrets
+package io.andrewohara.utils.jdbc
 
-import java.time.Duration
-import javax.sql.DataSource
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.http4k.core.Uri
 import org.http4k.core.query
+import java.time.Duration
 import java.util.concurrent.ThreadFactory
+import javax.sql.DataSource
 
-fun RdsSecret.hikariDataSource(
+fun hikariDataSource(
+    host: Uri,
+    username: String,
+    password: String,
     minConnections: Int = 1,
     maxConnections: Int = 10,
     idleTimeout: Duration = Duration.ofMinutes(5),
@@ -17,7 +20,7 @@ fun RdsSecret.hikariDataSource(
     threadFactory: ThreadFactory? = null
 ): DataSource {
     val config = HikariConfig()
-    config.jdbcUrl = Uri.of(jdbcUri()).apply {
+    config.jdbcUrl = host.apply {
         for ((key, value) in queryParams) {
             query(key, value)
         }
