@@ -95,8 +95,8 @@ class QueueExecutor<Message>(
     fun start(workers: Int, interval: Duration? = null) {
         require(workers > 0) { "Cannot start Executor without any workers" }
 
-        repeat(workers) {
-            threadFactory.newThread {
+        repeat(workers) {num ->
+            val thread = threadFactory.newThread {
                 while (!Thread.currentThread().isInterrupted) {
                     try {
                         invoke()
@@ -112,7 +112,9 @@ class QueueExecutor<Message>(
                         }
                     }
                 }
-            }.start()
+            }
+            thread.name = "${javaClass.simpleName}:$name-$num"
+            thread.start()
         }
     }
 
