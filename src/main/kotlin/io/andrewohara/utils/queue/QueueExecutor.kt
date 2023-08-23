@@ -2,18 +2,21 @@ package io.andrewohara.utils.queue
 
 import io.andrewohara.utils.IdGenerator
 import java.time.Duration
-import kotlin.concurrent.thread
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 
 fun <Message> WorkQueue<Message>.withWorker(
     errorHandler: ErrorHandler,
     taskErrorHandler: TaskErrorHandler<Message>,
     bufferSize: Int = 10,
+    executor: Executor = Executors.newCachedThreadPool(),
     task: (Message) -> Unit
 ) = QueueExecutor(
     queue = this,
     taskErrorHandler = taskErrorHandler,
     errorHandler = errorHandler,
     bufferSize = bufferSize,
+    executor = executor,
     batchTask = { batch ->
         batch.map { item ->
             try {
@@ -30,12 +33,14 @@ fun <Message> WorkQueue<Message>.withWorkerToResult(
     errorHandler: ErrorHandler,
     taskErrorHandler: TaskErrorHandler<Message>,
     bufferSize: Int = 10,
+    executor: Executor = Executors.newCachedThreadPool(),
     task: (QueueItem<Message>) -> TaskResult<Message>
 ) = QueueExecutor(
     queue = this,
     taskErrorHandler = taskErrorHandler,
     errorHandler = errorHandler,
     bufferSize = bufferSize,
+    executor = executor,
     batchTask = { batch ->
         batch.map { item ->
             try {
@@ -51,13 +56,15 @@ fun <Message> WorkQueue<Message>.withBatchWorker(
     errorHandler: ErrorHandler,
     taskErrorHandler: TaskErrorHandler<Message>,
     bufferSize: Int = 10,
+    executor: Executor = Executors.newCachedThreadPool(),
     batchTask: BatchTask<Message>
 ) = QueueExecutor(
     queue = this,
     taskErrorHandler = taskErrorHandler,
     errorHandler = errorHandler,
     bufferSize = bufferSize,
-    batchTask = batchTask
+    batchTask = batchTask,
+    executor = executor
 )
 
 class QueueExecutor<Message>(
@@ -66,7 +73,8 @@ class QueueExecutor<Message>(
     private val errorHandler: ErrorHandler,
     private val taskErrorHandler: TaskErrorHandler<Message>,
     private val batchTask: BatchTask<Message>,
-    private val name: String = "Executor ${IdGenerator.nextBase36(4)}"
+    private val name: String = "Executor ${IdGenerator.nextBase36(4)}",
+    private val executor: Executor
 ) {
     operator fun invoke() = try {
         val messages = queue(bufferSize)
@@ -87,8 +95,8 @@ class QueueExecutor<Message>(
     fun start(workers: Int, interval: Duration? = null) {
         require(workers > 0) { "Cannot start Executor without any workers" }
 
-        repeat(workers) { num ->
-            thread(name = "$name-$num") {
+        repeat(workers) {
+            executor.execute {
                 while (!Thread.currentThread().isInterrupted) {
                     try {
                         invoke()
