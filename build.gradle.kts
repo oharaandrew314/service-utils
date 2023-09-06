@@ -31,9 +31,10 @@ dependencies {
     compileOnly("org.jetbrains.exposed:exposed-dao")
 
     // aws v2
-    compileOnly(platform("software.amazon.awssdk:bom:2.17.85"))
+    compileOnly(platform("software.amazon.awssdk:bom:2.20.136"))
     compileOnly("software.amazon.awssdk:sqs")
     compileOnly("software.amazon.awssdk:dynamodb-enhanced")
+    compileOnly("software.amazon.awssdk:evidently")
 
     // http4k
     compileOnly(platform("org.http4k:http4k-bom:4.38.0.1"))
