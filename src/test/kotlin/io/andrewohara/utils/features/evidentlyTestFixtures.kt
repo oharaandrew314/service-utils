@@ -19,13 +19,13 @@ fun FakeEvidently.testFeature(): Pair<ProjectName, FeatureName> {
     val feature = client().createFeature(
         project = project.name,
         name = FeatureName.of("feature"),
-        defaultVariation = VariationName.of("legacy"),
+        defaultVariation = VariationName.of("java"),
         variations = mapOf(
-            VariationName.of("legacy") to VariableValue("java"),
-            VariationName.of("modern") to VariableValue("kotlin")
+            VariationName.of("java") to VariableValue("legacy"),
+            VariationName.of("kotlin") to VariableValue("modern")
         ),
         entityOverrides = mapOf(
-            EntityId.of("andrew") to VariationName.of("modern")
+            EntityId.of("andrew") to VariationName.of("kotlin")
         )
     )
         .map { it.feature }
