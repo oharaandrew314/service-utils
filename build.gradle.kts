@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "1.9.0"
-    kotlin("plugin.serialization") version "1.9.0"
+    kotlin("jvm") version "1.9.10"
+    kotlin("plugin.serialization") version "1.9.10"
     id("maven-publish")
     id("jacoco")
 }
@@ -37,7 +37,7 @@ dependencies {
     compileOnly("software.amazon.awssdk:evidently")
 
     // http4k
-    compileOnly(platform("org.http4k:http4k-bom:4.38.0.1"))
+    compileOnly(platform("org.http4k:http4k-bom:5.8.0.0"))
     compileOnly("org.http4k:http4k-core")
     compileOnly("org.http4k:http4k-contract")
     compileOnly("org.http4k:http4k-format-jackson")
@@ -46,8 +46,9 @@ dependencies {
     compileOnly("org.http4k:http4k-format-gson")
 
     // http4k-connect
-    compileOnly(platform("org.http4k:http4k-connect-bom:5.1.5.0"))
+    compileOnly(platform("org.http4k:http4k-connect-bom:5.2.0.0"))
     compileOnly("org.http4k:http4k-connect-amazon-sqs")
+    compileOnly("org.http4k:http4k-connect-amazon-evidently")
 
     testImplementation(kotlin("test"))
     testImplementation("io.kotest:kotest-assertions-core-jvm:5.4.2")
@@ -56,6 +57,7 @@ dependencies {
     testImplementation("dev.forkhandles:result4k-kotest")
     testImplementation("org.http4k:http4k-connect-amazon-sqs-fake")
     testImplementation("org.http4k:http4k-connect-amazon-dynamodb-fake")
+    testImplementation("org.http4k:http4k-connect-amazon-evidently-fake")
 }
 
 configurations { // don't want to bundle dependencies in library, but they are needed in tests

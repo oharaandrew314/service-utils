@@ -32,6 +32,3 @@ abstract class AbstractFeatureFlagsTest {
     }
 }
 
-class StaticFeaturesTest: AbstractFeatureFlagsTest() {
-    override fun getFeatureFlags(states: Map<String, String>, defaultState: String) = FeatureFlags.static(states, defaultState)
-}
