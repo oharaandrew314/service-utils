@@ -1,15 +1,10 @@
 package io.andrewohara.utils.features
 
 import io.kotest.matchers.shouldBe
-import org.http4k.aws.AwsSdkClient
-import org.http4k.connect.amazon.evidently.Evidently
 import org.http4k.connect.amazon.evidently.FakeEvidently
 import org.http4k.connect.amazon.evidently.model.FeatureName
 import org.http4k.connect.amazon.evidently.model.ProjectName
 import org.junit.jupiter.api.Test
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.services.evidently.EvidentlyClient
 
 class Http4kEvidentlyFeatureFlagsTest {
 
