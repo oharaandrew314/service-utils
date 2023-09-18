@@ -1,6 +1,7 @@
 package io.andrewohara.utils.queue
 
 import org.http4k.format.AutoMarshalling
+import software.amazon.awssdk.services.dynamodb.model.Get
 import software.amazon.awssdk.services.sqs.SqsClient
 import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchRequestEntry
 import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequestEntry
@@ -17,13 +18,15 @@ inline fun <reified Message: Any> WorkQueue.Companion.sqsV2(
     marshaller: AutoMarshalling,
     pollWaitTime: Duration = Duration.ofSeconds(20),
     deliveryDelay: Duration? =  null,
+    noinline getGroupId: (Message) -> String? = { null }
 ) = SqsV2WorkQueue(
     sqs = sqs,
     url = url,
     marshaller = marshaller,
     pollWaitTime = pollWaitTime,
     deliveryDelay = deliveryDelay,
-    type = Message::class
+    type = Message::class,
+    getGroupId = getGroupId
 )
 
 class SqsV2WorkQueue<Message: Any>(
@@ -32,7 +35,8 @@ class SqsV2WorkQueue<Message: Any>(
     private val marshaller: AutoMarshalling,
     private val pollWaitTime: Duration,
     private val deliveryDelay: Duration?,
-    private val type: KClass<Message>
+    private val type: KClass<Message>,
+    private val getGroupId: (Message) -> String? = { null }
 ): WorkQueue<Message> {
 
     override fun invoke(maxMessages: Int): List<SqsV2QueueItem<Message>> {
@@ -72,6 +76,7 @@ class SqsV2WorkQueue<Message: Any>(
             it.queueUrl(url)
             it.messageBody(marshaller.asFormatString(message))
             it.delaySeconds(deliveryDelay?.toSeconds()?.toInt())
+            it.messageGroupId(getGroupId(message))
         }
     }
 
@@ -84,6 +89,7 @@ class SqsV2WorkQueue<Message: Any>(
                         .id(index.toString())
                         .delaySeconds(deliveryDelay?.toSeconds()?.toInt())
                         .messageBody(marshaller.asFormatString(message))
+                        .messageGroupId(getGroupId(message))
                         .build()
                 }
 

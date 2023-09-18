@@ -22,13 +22,15 @@ inline fun <reified Message: Any> WorkQueue.Companion.http4k(
     marshaller: AutoMarshalling,
     pollWaitTime: Duration = Duration.ofSeconds(20),
     deliveryDelay: Duration? =  null,
+    noinline getGroupId: (Message) -> String? = { null },
 ) = Http4kConnectWorkQueue(
     sqs = sqs,
     url = url,
     marshaller = marshaller,
     pollWaitTime = pollWaitTime,
     deliveryDelay = deliveryDelay,
-    type = Message::class
+    type = Message::class,
+    getGroupId = getGroupId
 )
 
 class Http4kConnectWorkQueue<Message: Any>(
@@ -37,7 +39,8 @@ class Http4kConnectWorkQueue<Message: Any>(
     private val marshaller: AutoMarshalling,
     private val pollWaitTime: Duration,
     private val deliveryDelay: Duration?,
-    private val type: KClass<Message>
+    private val type: KClass<Message>,
+    private val getGroupId: (Message) -> String? = { null },
 ): WorkQueue<Message> {
 
     override fun invoke(maxMessages: Int): List<Http4kConnectWorkQueueItem<Message>> {
@@ -71,7 +74,8 @@ class Http4kConnectWorkQueue<Message: Any>(
         sqs.sendMessage(
             queueUrl = url,
             payload = marshaller.asFormatString(message),
-            delaySeconds = deliveryDelay?.toSeconds()?.toInt()
+            delaySeconds = deliveryDelay?.toSeconds()?.toInt(),
+            messageGroupId = getGroupId(message)
         )
     }
 
@@ -82,7 +86,8 @@ class Http4kConnectWorkQueue<Message: Any>(
                 SendMessageBatchEntry(
                     id = index.toString(),
                     payload = marshaller.asFormatString(message),
-                    delaySeconds = deliveryDelay?.toSeconds()?.toInt()
+                    delaySeconds = deliveryDelay?.toSeconds()?.toInt(),
+                    messageGroupId = getGroupId(message)
                 )
             }
         )
