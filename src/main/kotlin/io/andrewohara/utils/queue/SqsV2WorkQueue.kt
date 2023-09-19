@@ -1,7 +1,6 @@
 package io.andrewohara.utils.queue
 
 import org.http4k.format.AutoMarshalling
-import software.amazon.awssdk.services.dynamodb.model.Get
 import software.amazon.awssdk.services.sqs.SqsClient
 import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchRequestEntry
 import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequestEntry
@@ -18,7 +17,8 @@ inline fun <reified Message: Any> WorkQueue.Companion.sqsV2(
     marshaller: AutoMarshalling,
     pollWaitTime: Duration = Duration.ofSeconds(20),
     deliveryDelay: Duration? =  null,
-    noinline getGroupId: (Message) -> String? = { null }
+    noinline getGroupId: (Message) -> String? = { null },
+    noinline getDeduplicationId: (Message) -> String? = { null },
 ) = SqsV2WorkQueue(
     sqs = sqs,
     url = url,
@@ -26,7 +26,8 @@ inline fun <reified Message: Any> WorkQueue.Companion.sqsV2(
     pollWaitTime = pollWaitTime,
     deliveryDelay = deliveryDelay,
     type = Message::class,
-    getGroupId = getGroupId
+    getGroupId = getGroupId,
+    getDeduplicationId = getDeduplicationId
 )
 
 class SqsV2WorkQueue<Message: Any>(
@@ -36,7 +37,8 @@ class SqsV2WorkQueue<Message: Any>(
     private val pollWaitTime: Duration,
     private val deliveryDelay: Duration?,
     private val type: KClass<Message>,
-    private val getGroupId: (Message) -> String? = { null }
+    private val getGroupId: (Message) -> String? = { null },
+    private val getDeduplicationId: (Message) -> String? = { null }
 ): WorkQueue<Message> {
 
     override fun invoke(maxMessages: Int): List<SqsV2QueueItem<Message>> {
@@ -77,6 +79,7 @@ class SqsV2WorkQueue<Message: Any>(
             it.messageBody(marshaller.asFormatString(message))
             it.delaySeconds(deliveryDelay?.toSeconds()?.toInt())
             it.messageGroupId(getGroupId(message))
+            it.messageDeduplicationId(getDeduplicationId(message))
         }
     }
 
@@ -90,6 +93,7 @@ class SqsV2WorkQueue<Message: Any>(
                         .delaySeconds(deliveryDelay?.toSeconds()?.toInt())
                         .messageBody(marshaller.asFormatString(message))
                         .messageGroupId(getGroupId(message))
+                        .messageDeduplicationId(getDeduplicationId(message))
                         .build()
                 }
 

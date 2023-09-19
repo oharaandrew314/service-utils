@@ -23,6 +23,7 @@ inline fun <reified Message: Any> WorkQueue.Companion.http4k(
     pollWaitTime: Duration = Duration.ofSeconds(20),
     deliveryDelay: Duration? =  null,
     noinline getGroupId: (Message) -> String? = { null },
+    noinline getDeduplicationId: (Message) -> String? = { null },
 ) = Http4kConnectWorkQueue(
     sqs = sqs,
     url = url,
@@ -30,7 +31,8 @@ inline fun <reified Message: Any> WorkQueue.Companion.http4k(
     pollWaitTime = pollWaitTime,
     deliveryDelay = deliveryDelay,
     type = Message::class,
-    getGroupId = getGroupId
+    getGroupId = getGroupId,
+    getDeduplicationId = getDeduplicationId
 )
 
 class Http4kConnectWorkQueue<Message: Any>(
@@ -41,6 +43,7 @@ class Http4kConnectWorkQueue<Message: Any>(
     private val deliveryDelay: Duration?,
     private val type: KClass<Message>,
     private val getGroupId: (Message) -> String? = { null },
+    private val getDeduplicationId: (Message) -> String? = { null }
 ): WorkQueue<Message> {
 
     override fun invoke(maxMessages: Int): List<Http4kConnectWorkQueueItem<Message>> {
@@ -75,7 +78,8 @@ class Http4kConnectWorkQueue<Message: Any>(
             queueUrl = url,
             payload = marshaller.asFormatString(message),
             delaySeconds = deliveryDelay?.toSeconds()?.toInt(),
-            messageGroupId = getGroupId(message)
+            messageGroupId = getGroupId(message),
+            deduplicationId = getDeduplicationId(message)
         )
     }
 
@@ -87,7 +91,8 @@ class Http4kConnectWorkQueue<Message: Any>(
                     id = index.toString(),
                     payload = marshaller.asFormatString(message),
                     delaySeconds = deliveryDelay?.toSeconds()?.toInt(),
-                    messageGroupId = getGroupId(message)
+                    messageGroupId = getGroupId(message),
+                    dedeuplicationId = getDeduplicationId(message)
                 )
             }
         )
