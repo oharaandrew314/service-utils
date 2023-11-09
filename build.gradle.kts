@@ -19,6 +19,7 @@ dependencies {
     compileOnly("com.zaxxer:HikariCP:4.0.3")
     compileOnly("com.h2database:h2:2.1.214")
     compileOnly("com.michael-bull.kotlin-result:kotlin-result:1.1.16")
+    compileOnly("com.github.ksuid:ksuid:1.1.2")
 
     //forKHandles
     compileOnly(platform("dev.forkhandles:forkhandles-bom:2.6.0.0"))
@@ -49,6 +50,7 @@ dependencies {
     compileOnly(platform("org.http4k:http4k-connect-bom:5.2.0.0"))
     compileOnly("org.http4k:http4k-connect-amazon-sqs")
     compileOnly("org.http4k:http4k-connect-amazon-evidently")
+    compileOnly("org.http4k:http4k-connect-amazon-dynamodb")
 
     testImplementation(kotlin("test"))
     testImplementation("io.kotest:kotest-assertions-core-jvm:5.4.2")

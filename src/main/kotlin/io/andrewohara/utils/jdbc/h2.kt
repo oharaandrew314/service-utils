@@ -1,9 +1,13 @@
 package io.andrewohara.utils.jdbc
 
 import org.h2.jdbcx.JdbcDataSource
+import java.net.URI
 import javax.sql.DataSource
 
-class TestDb private constructor(private val dataSource: DataSource): DataSource by dataSource {
+class TestDb private constructor(
+    val uri: URI,
+    val dataSource: DataSource
+): DataSource by dataSource {
 
     companion object {
         operator fun invoke(dbName: String = "test", mode: String = "MySQL")
@@ -11,12 +15,13 @@ class TestDb private constructor(private val dataSource: DataSource): DataSource
 
         operator fun invoke(dbName: String, vararg params: Pair<String, String>): TestDb {
             val paramString = params.joinToString(";") { (key, value) -> "$key=$value" }
+            val uri = URI("jdbc:h2:mem:$dbName;$paramString")
             val dataSource = JdbcDataSource().apply {
-                setURL("jdbc:h2:mem:$dbName;$paramString")
+                setURL(uri.toString())
                 this.user = "sa"
                 this.password = ""
             }
-            return TestDb(dataSource)
+            return TestDb(uri, dataSource)
         }
     }
 
