@@ -27,3 +27,15 @@ fun FeatureFlags.Companion.static(vararg states: Pair<String, String>, defaultSt
 fun FeatureFlags.Companion.static(features: Map<String, String>, defaultState: String = "on") = FeatureFlags { name ->
     FeatureFlag.static(features[name] ?: defaultState)
 }
+
+fun FeatureFlag.catchErrors(
+    default: String,
+    onError: (Exception) -> Unit = {}
+) = FeatureFlag {
+    try {
+        invoke(it)
+    } catch (e: Exception) {
+        onError(e)
+        default
+    }
+}

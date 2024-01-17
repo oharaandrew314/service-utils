@@ -20,6 +20,7 @@ dependencies {
     compileOnly("com.h2database:h2:2.1.214")
     compileOnly("com.michael-bull.kotlin-result:kotlin-result:1.1.16")
     compileOnly("com.github.ksuid:ksuid:1.1.2")
+    compileOnly("com.github.ben-manes.caffeine:caffeine:3.1.8")
 
     //forKHandles
     compileOnly(platform("dev.forkhandles:forkhandles-bom:2.6.0.0"))
