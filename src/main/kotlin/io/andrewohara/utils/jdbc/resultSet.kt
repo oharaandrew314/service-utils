@@ -18,7 +18,9 @@ inline fun <reified T: Enum<T>> ResultSet.getEnumOrNull(name: String): T? {
 }
 
 fun ResultSet.toSequence(): Sequence<ResultSet> = sequence {
-    while(next()) {
-        yield(this@toSequence)
+    use {
+        while(next()) {
+            yield(this@toSequence)
+        }
     }
 }
