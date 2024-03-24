@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "1.9.10"
-    kotlin("plugin.serialization") version "1.9.10"
+    kotlin("jvm") version "1.9.23"
+    kotlin("plugin.serialization") version "1.9.23"
     id("maven-publish")
     id("jacoco")
 }
@@ -46,6 +46,7 @@ dependencies {
     compileOnly("org.http4k:http4k-format-jackson-yaml")
     compileOnly("org.http4k:http4k-format-moshi")
     compileOnly("org.http4k:http4k-format-gson")
+    compileOnly("org.http4k:http4k-client-websocket")
 
     // http4k-connect
     compileOnly(platform("org.http4k:http4k-connect-bom:5.2.0.0"))
@@ -56,6 +57,7 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation("io.kotest:kotest-assertions-core-jvm:5.4.2")
     testImplementation("org.http4k:http4k-testing-kotest")
+    testImplementation("org.http4k:http4k-server-jetty")
     testImplementation("org.slf4j:slf4j-log4j12:2.0.7")
     testImplementation("dev.forkhandles:result4k-kotest")
     testImplementation("org.http4k:http4k-connect-amazon-sqs-fake")

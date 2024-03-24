@@ -1,4 +1,4 @@
-package io.andrewohara.utils.http4k
+package io.andrewohara.utils.slf4j
 
 import org.slf4j.Marker
 import org.slf4j.event.Level
