@@ -20,8 +20,10 @@ class JavaWsHandlerTest {
     private val messages = mutableListOf<String>()
     private val wsHandler = { _: Request ->
         WsResponse { ws ->
-            ws.onMessage { messages += it.bodyString() }
-            waitForMessage.countDown()
+            ws.onMessage {
+                messages += it.bodyString()
+                waitForMessage.countDown()
+            }
         }
     }
     private val waitForMessage = CountDownLatch(1)
