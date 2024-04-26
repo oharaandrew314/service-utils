@@ -100,6 +100,19 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             from(components["kotlin"])
+
+            val archivesBaseName = tasks.jar.get().archiveBaseName.get()
+            pom.withXml {
+                asNode().appendNode("name", archivesBaseName)
+                asNode().appendNode("description", description)
+                asNode().appendNode("developers")
+                    .appendNode("developer").appendNode("name", "Andrew O'Hara")
+                asNode().appendNode("scm")
+                    .appendNode("url", "https://github.com/oharaandrew314/service-utils").parent()
+                asNode().appendNode("licenses").appendNode("license")
+                    .appendNode("name", "Apache License, Version 2.0").parent()
+                    .appendNode("url", "http://www.apache.org/licenses/LICENSE-2.0.html")
+            }
         }
     }
 }
