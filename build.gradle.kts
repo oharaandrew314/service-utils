@@ -101,9 +101,8 @@ publishing {
         create<MavenPublication>("maven") {
             from(components["kotlin"])
 
-            val archivesBaseName = tasks.jar.get().archiveBaseName.get()
             pom.withXml {
-                asNode().appendNode("name", archivesBaseName)
+                asNode().appendNode("name", "service-utils")
                 asNode().appendNode("description", description)
                 asNode().appendNode("developers")
                     .appendNode("developer").appendNode("name", "Andrew O'Hara")
