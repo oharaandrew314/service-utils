@@ -15,7 +15,7 @@ inline fun <reified Message: Any> WorkQueue.Companion.sqsV2(
     sqs: SqsClient,
     url: String,
     marshaller: AutoMarshalling,
-    pollWaitTime: Duration = Duration.ofSeconds(20),
+    pollWaitTime: Duration? = null,
     deliveryDelay: Duration? =  null,
     noinline getGroupId: (Message) -> String? = { null },
     noinline getDeduplicationId: (Message) -> String? = { null },
@@ -34,7 +34,7 @@ class SqsV2WorkQueue<Message: Any>(
     private val sqs: SqsClient,
     private val url: String,
     private val marshaller: AutoMarshalling,
-    private val pollWaitTime: Duration,
+    private val pollWaitTime: Duration?,
     private val deliveryDelay: Duration?,
     private val type: KClass<Message>,
     private val getGroupId: (Message) -> String? = { null },
@@ -45,7 +45,7 @@ class SqsV2WorkQueue<Message: Any>(
         val response = sqs.receiveMessage {
             it.queueUrl(url)
             it.maxNumberOfMessages(maxMessages.coerceAtMost(MAX_RECEIVE_COUNT))
-            it.waitTimeSeconds(pollWaitTime.toSeconds().toInt())
+            it.waitTimeSeconds(pollWaitTime?.toSeconds()?.toInt())
         }
 
         return response.messages().mapNotNull { message ->

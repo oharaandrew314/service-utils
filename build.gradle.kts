@@ -33,7 +33,7 @@ dependencies {
     compileOnly("org.jetbrains.exposed:exposed-dao")
 
     // aws v2
-    compileOnly(platform("software.amazon.awssdk:bom:2.20.136"))
+    compileOnly(platform("software.amazon.awssdk:bom:2.26.15"))
     compileOnly("software.amazon.awssdk:sqs")
     compileOnly("software.amazon.awssdk:dynamodb-enhanced")
     compileOnly("software.amazon.awssdk:evidently")
@@ -57,7 +57,7 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation("io.kotest:kotest-assertions-core-jvm:5.4.2")
     testImplementation("org.http4k:http4k-testing-kotest")
-    testImplementation("org.http4k:http4k-server-jetty")
+    testImplementation("org.http4k:http4k-server-jetty11")
     testImplementation("org.slf4j:slf4j-log4j12:2.0.7")
     testImplementation("dev.forkhandles:result4k-kotest")
     testImplementation("org.http4k:http4k-connect-amazon-sqs-fake")

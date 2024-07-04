@@ -1,7 +1,6 @@
 package io.andrewohara.utils.http4k.ws
 
-import com.natpryce.hamkrest.assertion.assertThat
-import com.natpryce.hamkrest.equalTo
+import io.kotest.matchers.collections.shouldContainExactly
 import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.websocket.WsMessage
@@ -22,6 +21,6 @@ class SymmetricWsHandlerTest {
         handler(Request(Method.GET, "/"))
             .send(WsMessage("hi"))
 
-        assertThat(messages, equalTo(listOf("hi")))
+        messages.shouldContainExactly("hi")
     }
 }
