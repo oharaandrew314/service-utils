@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "1.9.23"
-    kotlin("plugin.serialization") version "1.9.23"
+    kotlin("jvm") version "2.0.0"
+    kotlin("plugin.serialization") version "2.0.0"
     id("maven-publish")
     id("jacoco")
 }
@@ -23,7 +23,7 @@ dependencies {
     compileOnly("com.github.ben-manes.caffeine:caffeine:3.1.8")
 
     //forKHandles
-    compileOnly(platform("dev.forkhandles:forkhandles-bom:2.6.0.0"))
+    compileOnly(platform("dev.forkhandles:forkhandles-bom:2.19.0.0"))
     compileOnly("dev.forkhandles:values4k")
     compileOnly("dev.forkhandles:result4k")
 
@@ -39,7 +39,7 @@ dependencies {
     compileOnly("software.amazon.awssdk:evidently")
 
     // http4k
-    compileOnly(platform("org.http4k:http4k-bom:5.8.0.0"))
+    compileOnly(platform("org.http4k:http4k-bom:5.24.0.0"))
     compileOnly("org.http4k:http4k-core")
     compileOnly("org.http4k:http4k-contract")
     compileOnly("org.http4k:http4k-format-jackson")
@@ -49,7 +49,7 @@ dependencies {
     compileOnly("org.http4k:http4k-client-websocket")
 
     // http4k-connect
-    compileOnly(platform("org.http4k:http4k-connect-bom:5.2.0.0"))
+    compileOnly(platform("org.http4k:http4k-connect-bom:5.17.0.2"))
     compileOnly("org.http4k:http4k-connect-amazon-sqs")
     compileOnly("org.http4k:http4k-connect-amazon-evidently")
     compileOnly("org.http4k:http4k-connect-amazon-dynamodb")

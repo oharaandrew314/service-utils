@@ -92,7 +92,7 @@ class Http4kConnectWorkQueue<Message: Any>(
                     payload = marshaller.asFormatString(message),
                     delaySeconds = deliveryDelay?.toSeconds()?.toInt(),
                     messageGroupId = getGroupId(message),
-                    dedeuplicationId = getDeduplicationId(message)
+                    deduplicationId = getDeduplicationId(message)
                 )
             }
         )
