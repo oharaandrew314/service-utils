@@ -1,13 +1,14 @@
+import com.vanniktech.maven.publish.SonatypeHost
+
 plugins {
     kotlin("jvm") version "2.0.0"
     kotlin("plugin.serialization") version "2.0.0"
-    id("maven-publish")
+    id("com.vanniktech.maven.publish") version "0.29.0"
     id("jacoco")
 }
 
 repositories {
     mavenCentral()
-    maven { setUrl("https://jitpack.io") }
 }
 
 dependencies {
@@ -96,22 +97,32 @@ tasks {
     }
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            from(components["kotlin"])
+mavenPublishing {
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
+    signAllPublications()
+    coordinates("dev.andrewohara", "service-utils", "1.20.0")
 
-            pom.withXml {
-                asNode().appendNode("name", "service-utils")
-                asNode().appendNode("description", description)
-                asNode().appendNode("developers")
-                    .appendNode("developer").appendNode("name", "Andrew O'Hara")
-                asNode().appendNode("scm")
-                    .appendNode("url", "https://github.com/oharaandrew314/service-utils").parent()
-                asNode().appendNode("licenses").appendNode("license")
-                    .appendNode("name", "Apache License, Version 2.0").parent()
-                    .appendNode("url", "http://www.apache.org/licenses/LICENSE-2.0.html")
+    pom {
+        name.set("Service Utils")
+        description.set("Collection of useful kotlin microservice utilities")
+        inceptionYear.set("2021")
+        url.set("https://github.com/oharaandrew314/service-utils")
+        licenses {
+            license {
+                name.set("The Apache License, Version 2.0")
+                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                distribution.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
             }
+        }
+        developers {
+            developer {
+                id.set("oharaandrew314")
+                name.set("Andrew O'Hara")
+                url.set("https://github.com/oharaandrew314")
+            }
+        }
+        scm {
+            url.set("https://github.com/oharaandrew314/service-utils")
         }
     }
 }

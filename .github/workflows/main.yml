@@ -46,3 +46,17 @@ jobs:
 
       - name: Test
         run: sh ./gradlew check --stacktrace
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: 11
+          distribution: adopt
+
+      - name: Publish
+        run: sh ./gradlew publish
