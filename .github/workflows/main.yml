@@ -33,7 +33,7 @@ jobs:
       matrix:
         java_version: [ 11, 17, 21 ]
         os: [windows-latest, macOS-latest, ubuntu-latest]
-        distribution: [ adopt ]
+        distribution: [ termium ]
     steps:
       - name: Checkout latest code
         uses: actions/checkout@v1
@@ -57,7 +57,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: 11
-          distribution: adopt
+          distribution: termium
 
       - name: Publish
         run: sh ./gradlew publish
