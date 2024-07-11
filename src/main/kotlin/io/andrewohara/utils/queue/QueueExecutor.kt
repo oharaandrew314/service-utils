@@ -90,6 +90,7 @@ class QueueExecutor<Message>(
         }
     } catch (e: Throwable) {
         errorHandler(e)
+        Thread.sleep(1_000)
     }
 
     fun start(workers: Int, interval: Duration? = null) {

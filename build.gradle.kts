@@ -39,7 +39,7 @@ dependencies {
     compileOnly("software.amazon.awssdk:evidently")
 
     // http4k
-    compileOnly(platform("org.http4k:http4k-bom:5.24.0.0"))
+    compileOnly(platform("org.http4k:http4k-bom:5.25.0.0"))
     compileOnly("org.http4k:http4k-core")
     compileOnly("org.http4k:http4k-contract")
     compileOnly("org.http4k:http4k-format-jackson")
@@ -49,7 +49,7 @@ dependencies {
     compileOnly("org.http4k:http4k-client-websocket")
 
     // http4k-connect
-    compileOnly(platform("org.http4k:http4k-connect-bom:5.17.0.2"))
+    compileOnly(platform("org.http4k:http4k-connect-bom:5.18.0.0"))
     compileOnly("org.http4k:http4k-connect-amazon-sqs")
     compileOnly("org.http4k:http4k-connect-amazon-evidently")
     compileOnly("org.http4k:http4k-connect-amazon-dynamodb")

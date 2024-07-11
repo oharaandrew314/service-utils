@@ -50,7 +50,7 @@ class Http4kConnectWorkQueue<Message: Any>(
         val messages = sqs.receiveMessage(
             queueUrl = url,
             maxNumberOfMessages = maxMessages.coerceAtMost(MAX_RECEIVE_COUNT) ,
-            longPollTime = pollWaitTime
+            waitTimeSeconds = pollWaitTime?.toSeconds()?.toInt()
         ).onFailure { it.reason.throwIt() }
 
 
