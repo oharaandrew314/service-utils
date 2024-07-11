@@ -49,6 +49,7 @@ jobs:
   publish:
     needs: [ test, coverage ]
     runs-on: ubuntu-latest
+    if: "!contains(github.event.commits[0].message, '[skip ci]')"
     steps:
       - name: Checkout latest code
         uses: actions/checkout@v4
