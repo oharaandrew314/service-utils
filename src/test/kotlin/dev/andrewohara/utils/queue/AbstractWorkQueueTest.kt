@@ -1,6 +1,6 @@
 package dev.andrewohara.utils.queue
 
-import io.andrewohara.utils.jdk.toClock
+import dev.andrewohara.utils.jdk.toClock
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import org.junit.jupiter.api.BeforeEach

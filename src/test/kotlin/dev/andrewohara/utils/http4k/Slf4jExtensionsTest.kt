@@ -1,8 +1,8 @@
 package dev.andrewohara.utils.http4k
 
-import io.andrewohara.utils.jdk.toClock
-import io.andrewohara.utils.slf4j.InMemoryLogger
-import io.andrewohara.utils.slf4j.LogMessage
+import dev.andrewohara.utils.jdk.toClock
+import dev.andrewohara.utils.slf4j.InMemoryLogger
+import dev.andrewohara.utils.slf4j.LogMessage
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull

@@ -1,5 +1,6 @@
 package dev.andrewohara.utils.dynamodb.v2
 
+import io.andrewohara.utils.dynamodb.v2.*
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe

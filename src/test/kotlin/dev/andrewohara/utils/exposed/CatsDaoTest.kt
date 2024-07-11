@@ -1,7 +1,7 @@
 package dev.andrewohara.utils.exposed
 
+import dev.andrewohara.utils.jdbc.TestDb
 import dev.forkhandles.values.random
-import io.andrewohara.utils.jdbc.TestDb
 import io.kotest.matchers.shouldBe
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction

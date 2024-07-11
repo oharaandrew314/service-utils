@@ -1,5 +1,6 @@
 package dev.andrewohara.utils
 
+import io.andrewohara.utils.IdGenerator
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldHaveLength
 import org.junit.jupiter.api.Test

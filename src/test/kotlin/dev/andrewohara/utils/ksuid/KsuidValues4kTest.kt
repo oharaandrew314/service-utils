@@ -2,7 +2,7 @@ package dev.andrewohara.utils.ksuid
 
 import com.github.ksuid.Ksuid
 import com.github.ksuid.KsuidGenerator
-import io.andrewohara.utils.jdk.toClock
+import dev.andrewohara.utils.jdk.toClock
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import java.time.Instant

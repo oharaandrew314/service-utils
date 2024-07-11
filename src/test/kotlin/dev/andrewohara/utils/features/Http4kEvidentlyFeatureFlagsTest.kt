@@ -1,5 +1,7 @@
 package dev.andrewohara.utils.features
 
+import io.andrewohara.utils.features.FeatureFlags
+import io.andrewohara.utils.features.evidently
 import io.kotest.matchers.shouldBe
 import org.http4k.connect.amazon.evidently.FakeEvidently
 import org.http4k.connect.amazon.evidently.model.FeatureName

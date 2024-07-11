@@ -1,5 +1,6 @@
 package dev.andrewohara.utils.features
 
+import io.andrewohara.utils.features.FeatureFlags
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
