@@ -85,24 +85,11 @@ tasks.jacocoTestReport {
     }
 }
 
-tasks {
-    val sourcesJar by creating(Jar::class) {
-        archiveClassifier.set("sources")
-        artifacts {
-            kotlinSourcesJar
-        }
-    }
-
-    artifacts {
-        archives(sourcesJar)
-    }
-}
-
 mavenPublishing {
     configure(KotlinJvm(sourcesJar = true))
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
     signAllPublications()
-    coordinates("dev.andrewohara", "service-utils", "1.20.0")
+    coordinates("dev.andrewohara", "service-utils", "1.20.1")
 
     pom {
         name.set("Service Utils")
