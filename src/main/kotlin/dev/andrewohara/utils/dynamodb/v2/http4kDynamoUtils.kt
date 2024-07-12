@@ -1,4 +1,4 @@
-package io.andrewohara.utils.dynamodb.v2
+package dev.andrewohara.utils.dynamodb.v2
 
 import org.http4k.core.Uri
 import software.amazon.awssdk.enhanced.dynamodb.AttributeConverter

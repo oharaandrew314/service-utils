@@ -1,4 +1,4 @@
-package io.andrewohara.utils.features
+package dev.andrewohara.utils.features
 
 import dev.forkhandles.result4k.map
 import dev.forkhandles.result4k.onFailure

@@ -1,4 +1,4 @@
-package io.andrewohara.utils
+package dev.andrewohara.utils
 
 import java.util.Random
 

@@ -1,4 +1,4 @@
-package io.andrewohara.utils.secrets
+package dev.andrewohara.utils.secrets
 
 import java.time.Duration
 import javax.sql.DataSource

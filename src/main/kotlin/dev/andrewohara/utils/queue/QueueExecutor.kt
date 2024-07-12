@@ -1,6 +1,6 @@
 package dev.andrewohara.utils.queue
 
-import io.andrewohara.utils.IdGenerator
+import dev.andrewohara.utils.IdGenerator
 import java.time.Duration
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory

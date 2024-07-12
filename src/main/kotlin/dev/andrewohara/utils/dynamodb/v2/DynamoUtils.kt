@@ -1,4 +1,4 @@
-package io.andrewohara.utils.dynamodb.v2
+package dev.andrewohara.utils.dynamodb.v2
 
 import software.amazon.awssdk.enhanced.dynamodb.*
 import software.amazon.awssdk.enhanced.dynamodb.model.ReadBatch

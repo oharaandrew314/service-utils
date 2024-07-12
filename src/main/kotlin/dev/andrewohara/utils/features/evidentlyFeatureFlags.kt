@@ -1,4 +1,4 @@
-package io.andrewohara.utils.features
+package dev.andrewohara.utils.features
 
 import software.amazon.awssdk.services.evidently.EvidentlyClient
 import software.amazon.awssdk.services.evidently.model.EvaluateFeatureResponse

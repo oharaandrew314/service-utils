@@ -1,4 +1,4 @@
-package io.andrewohara.utils.features
+package dev.andrewohara.utils.features
 
 import io.split.client.SplitClient
 import io.split.client.SplitClientConfig

@@ -10,8 +10,8 @@ import dev.forkhandles.values.StringValue
 import dev.forkhandles.values.StringValueFactory
 import dev.forkhandles.values.UUIDValue
 import dev.forkhandles.values.UUIDValueFactory
-import io.andrewohara.utils.kotlinx.serialization.values4KSerializer
-import io.andrewohara.utils.kotlinx.serialization.values4kSerializer
+import dev.andrewohara.utils.kotlinx.serialization.values4KSerializer
+import dev.andrewohara.utils.kotlinx.serialization.values4kSerializer
 import io.kotest.matchers.shouldBe
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable

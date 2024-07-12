@@ -1,7 +1,7 @@
 package dev.andrewohara.utils.features
 
-import io.andrewohara.utils.features.FeatureFlag
-import io.andrewohara.utils.features.static
+import dev.andrewohara.utils.features.FeatureFlag
+import dev.andrewohara.utils.features.static
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 

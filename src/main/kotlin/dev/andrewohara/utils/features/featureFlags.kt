@@ -1,4 +1,4 @@
-package io.andrewohara.utils.features
+package dev.andrewohara.utils.features
 
 fun interface FeatureFlags {
     operator fun get(feature: String): FeatureFlag

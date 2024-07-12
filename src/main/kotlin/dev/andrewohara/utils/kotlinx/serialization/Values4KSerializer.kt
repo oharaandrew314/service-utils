@@ -1,4 +1,4 @@
-package io.andrewohara.utils.kotlinx.serialization
+package dev.andrewohara.utils.kotlinx.serialization
 
 import dev.forkhandles.values.Value
 import dev.forkhandles.values.ValueFactory
