@@ -61,4 +61,9 @@ jobs:
           distribution: temurin
 
       - name: Publish
-        run: sh ./gradlew publish --no-configuration-cache --info
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.central_user }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.central_pass }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.signing_key }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.signing_key_password }}
+        run: sh ./gradlew publish --no-configuration-cache
