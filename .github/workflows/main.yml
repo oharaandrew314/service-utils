@@ -61,4 +61,4 @@ jobs:
           distribution: temurin
 
       - name: Publish
-        run: sh ./gradlew publish
+        run: sh ./gradlew publish --no-configuration-cache
