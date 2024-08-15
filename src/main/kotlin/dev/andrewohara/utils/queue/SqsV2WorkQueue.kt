@@ -15,7 +15,7 @@ inline fun <reified Message: Any> WorkQueue.Companion.sqsV2(
     sqs: SqsClient,
     url: String,
     marshaller: AutoMarshalling,
-    pollWaitTime: Duration? = Duration.ofSeconds(10),
+    pollWaitTime: Duration? = Duration.ofSeconds(20),
     deliveryDelay: Duration? =  null,
     noinline getGroupId: (Message) -> String? = { null },
     noinline getDeduplicationId: (Message) -> String? = { null },
