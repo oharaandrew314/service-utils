@@ -89,7 +89,7 @@ mavenPublishing {
     configure(KotlinJvm(sourcesJar = true))
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
     signAllPublications()
-    coordinates("dev.andrewohara", "service-utils", "1.20.3")
+    coordinates("dev.andrewohara", "service-utils", "1.20.4")
 
     pom {
         name.set("Service Utils")
