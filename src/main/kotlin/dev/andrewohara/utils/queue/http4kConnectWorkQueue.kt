@@ -20,7 +20,7 @@ inline fun <reified Message: Any> WorkQueue.Companion.http4k(
     sqs: SQS,
     url: Uri,
     marshaller: AutoMarshalling,
-    pollWaitTime: Duration? = null,
+    pollWaitTime: Duration? = Duration.ofSeconds(10),
     deliveryDelay: Duration? =  null,
     noinline getGroupId: (Message) -> String? = { null },
     noinline getDeduplicationId: (Message) -> String? = { null },
