@@ -30,6 +30,11 @@ private val defaultGenerator by lazy {
 }
 
 fun <DOMAIN : Value<Ksuid>> KsuidValueFactory<DOMAIN>.random(
-    clock: Clock = Clock.systemUTC(),
+    clock: Clock,
     gen: KsuidGenerator = defaultGenerator
-) = of(gen.newKsuid(clock.instant()))
+) = random(clock.instant(), gen)
+
+fun <DOMAIN : Value<Ksuid>> KsuidValueFactory<DOMAIN>.random(
+    time: Instant = Instant.now(),
+    gen: KsuidGenerator = defaultGenerator
+) = of(gen.newKsuid(time))

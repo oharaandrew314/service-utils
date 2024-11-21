@@ -15,11 +15,21 @@ class MyKsuidValue private constructor(value: Ksuid): KsuidValue(value) {
 class KsuidValues4kTest {
 
     @Test
-    fun `generate id`() {
+    fun `generate id - override clock`() {
         val time = Instant.parse("2023-09-18T12:00:00Z")
         val random = Random(1337)
 
         val ksuid = MyKsuidValue.random(time.toClock(), KsuidGenerator(random))
+        ksuid.value.toString() shouldBe "2VZKwSmOFrH28QKVG3qE3XVoMUp"
+        ksuid.instant shouldBe time
+    }
+
+    @Test
+    fun `generate id - override time`() {
+        val time = Instant.parse("2023-09-18T12:00:00Z")
+        val random = Random(1337)
+
+        val ksuid = MyKsuidValue.random(time, KsuidGenerator(random))
         ksuid.value.toString() shouldBe "2VZKwSmOFrH28QKVG3qE3XVoMUp"
         ksuid.instant shouldBe time
     }
