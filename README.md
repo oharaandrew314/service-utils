@@ -20,3 +20,4 @@ Utilities for my kotlin microservices
 - Result4k failIf and recoverIf
 - Exposed transforms for nullable columns
 - Feature Flags (Static, Split, Evidently)
+- Cursor-based pagination utils
