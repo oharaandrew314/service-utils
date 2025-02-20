@@ -80,7 +80,7 @@ class Http4kConnectWorkQueue<Message: Any>(
             delaySeconds = deliveryDelay?.toSeconds()?.toInt(),
             messageGroupId = getGroupId(message),
             deduplicationId = getDeduplicationId(message)
-        )
+        ).onFailure { it.reason.throwIt() }
     }
 
     override fun plusAssign(messages: Collection<Message>) {
@@ -95,7 +95,7 @@ class Http4kConnectWorkQueue<Message: Any>(
                     deduplicationId = getDeduplicationId(message)
                 )
             }
-        )
+        ).onFailure { it.reason.throwIt() }
     }
 
     override fun toString() = "${javaClass.simpleName}: $url"
