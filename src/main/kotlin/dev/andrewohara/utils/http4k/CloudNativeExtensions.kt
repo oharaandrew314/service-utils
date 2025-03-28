@@ -1,6 +1,6 @@
 package dev.andrewohara.utils.http4k
 
-import org.http4k.cloudnative.env.EnvironmentKey
+import org.http4k.config.EnvironmentKey
 import java.nio.file.Path
 
 

@@ -4,7 +4,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Uri
-import org.http4k.server.Jetty11
+import org.http4k.server.JettyLoom
 import org.http4k.server.asServer
 import org.http4k.websocket.WsMessage
 import org.http4k.websocket.WsResponse
@@ -26,7 +26,7 @@ class JavaWsHandlerTest {
     }
     private val waitForMessage = CountDownLatch(1)
 
-    private val server = wsHandler.asServer(Jetty11(0)).start()
+    private val server = wsHandler.asServer(JettyLoom(0)).start()
 
     private val client = SymmetricWsFilter.SetHostFrom(Uri.of("ws://localhost:${server.port()}"))
         .then(JavaWsHandler(timeout = Duration.ofSeconds(1)))

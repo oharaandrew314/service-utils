@@ -1,4 +1,4 @@
-name: Test modern LTS JDKs on all OS's
+name: Test JDK 21 on all OS's
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: 11
+          java-version: 21
           distribution: temurin
 
       - name: Build Coverage
@@ -31,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java_version: [ 11, 17, 21 ]
+        java_version: [ 21 ]
         os: [windows-latest, macOS-latest, ubuntu-latest]
         distribution: [ temurin ]
     steps:
@@ -57,7 +57,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: 11
+          java-version: 21
           distribution: temurin
 
       - name: Publish

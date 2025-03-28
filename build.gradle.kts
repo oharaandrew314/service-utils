@@ -2,9 +2,9 @@ import com.vanniktech.maven.publish.SonatypeHost
 import com.vanniktech.maven.publish.KotlinJvm
 
 plugins {
-    kotlin("jvm") version "2.0.0"
-    kotlin("plugin.serialization") version "2.0.0"
-    id("com.vanniktech.maven.publish") version "0.29.0"
+    kotlin("jvm")
+    kotlin("plugin.serialization")
+    id("com.vanniktech.maven.publish")
     id("jacoco")
 }
 
@@ -15,52 +15,38 @@ repositories {
 dependencies {
 
     compileOnly(kotlin("stdlib"))
-    compileOnly("org.slf4j:slf4j-api:2.0.7")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
-    compileOnly("io.split.client:java-client:4.4.4")
-    compileOnly("com.zaxxer:HikariCP:4.0.3")
-    compileOnly("com.h2database:h2:2.1.214")
-    compileOnly("com.michael-bull.kotlin-result:kotlin-result:1.1.16")
-    compileOnly("com.github.ksuid:ksuid:1.1.2")
-    compileOnly("com.github.ben-manes.caffeine:caffeine:3.1.8")
+    compileOnly("org.slf4j:slf4j-api:_")
+    compileOnly(KotlinX.serialization.json)
+    compileOnly("io.split.client:java-client:_")
+    compileOnly("com.zaxxer:HikariCP:_")
+    compileOnly("com.h2database:h2:_")
+    compileOnly("com.michael-bull.kotlin-result:kotlin-result:_")
+    compileOnly("com.github.ksuid:ksuid:_")
+    compileOnly("com.github.ben-manes.caffeine:caffeine:_")
 
     //forKHandles
-    compileOnly(platform("dev.forkhandles:forkhandles-bom:2.19.0.0"))
+    compileOnly(platform("dev.forkhandles:forkhandles-bom:_"))
     compileOnly("dev.forkhandles:values4k")
     compileOnly("dev.forkhandles:result4k")
 
-    // exposed
-    compileOnly(platform("org.jetbrains.exposed:exposed-bom:0.41.1"))
-    compileOnly("org.jetbrains.exposed:exposed-jdbc")
-    compileOnly("org.jetbrains.exposed:exposed-dao")
-
     // aws v2
-    compileOnly(platform("software.amazon.awssdk:bom:2.26.15"))
+    compileOnly(platform("software.amazon.awssdk:bom:_"))
     compileOnly("software.amazon.awssdk:sqs")
     compileOnly("software.amazon.awssdk:dynamodb-enhanced")
     compileOnly("software.amazon.awssdk:evidently")
 
     // http4k
-    compileOnly(platform("org.http4k:http4k-bom:5.25.0.0"))
-    compileOnly("org.http4k:http4k-core")
-    compileOnly("org.http4k:http4k-contract")
-    compileOnly("org.http4k:http4k-format-jackson")
-    compileOnly("org.http4k:http4k-format-jackson-yaml")
-    compileOnly("org.http4k:http4k-format-moshi")
-    compileOnly("org.http4k:http4k-format-gson")
-    compileOnly("org.http4k:http4k-client-websocket")
-
-    // http4k-connect
-    compileOnly(platform("org.http4k:http4k-connect-bom:5.18.0.0"))
+    compileOnly(platform(Http4k.bom))
+    compileOnly(Http4k.client.websocket)
+    compileOnly("org.http4k:http4k-api-openapi")
     compileOnly("org.http4k:http4k-connect-amazon-sqs")
     compileOnly("org.http4k:http4k-connect-amazon-evidently")
     compileOnly("org.http4k:http4k-connect-amazon-dynamodb")
 
     testImplementation(kotlin("test"))
-    testImplementation("io.kotest:kotest-assertions-core-jvm:5.4.2")
-    testImplementation("org.http4k:http4k-testing-kotest")
-    testImplementation("org.http4k:http4k-server-jetty11")
-    testImplementation("org.slf4j:slf4j-log4j12:2.0.7")
+    testImplementation(Http4k.testing.kotest)
+    testImplementation(Http4k.server.jetty)
+    testImplementation("org.slf4j:slf4j-log4j12:_")
     testImplementation("dev.forkhandles:result4k-kotest")
     testImplementation("org.http4k:http4k-connect-amazon-sqs-fake")
     testImplementation("org.http4k:http4k-connect-amazon-dynamodb-fake")
@@ -118,4 +104,8 @@ mavenPublishing {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+kotlin {
+    jvmToolchain(21)
 }

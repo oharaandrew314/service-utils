@@ -18,6 +18,5 @@ Utilities for my kotlin microservices
 - Kotlinx Serializers for values4k
 - Result4k and Kotlin-Result migration
 - Result4k failIf and recoverIf
-- Exposed transforms for nullable columns
 - Feature Flags (Static, Split, Evidently)
 - Cursor-based pagination utils
