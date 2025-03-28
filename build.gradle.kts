@@ -59,12 +59,6 @@ configurations { // don't want to bundle dependencies in library, but they are n
     }
 }
 
-allprojects {
-    jacoco {
-        toolVersion = "0.8.7"
-    }
-}
-
 tasks.jacocoTestReport {
     reports {
         xml.required.set(false)
