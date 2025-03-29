@@ -23,6 +23,8 @@ dependencies {
     compileOnly("com.michael-bull.kotlin-result:kotlin-result:_")
     compileOnly("com.github.ksuid:ksuid:_")
     compileOnly("com.github.ben-manes.caffeine:caffeine:_")
+    compileOnly("redis.clients:jedis:_")
+    compileOnly("org.redisson:redisson:_")
 
     //forKHandles
     compileOnly(platform("dev.forkhandles:forkhandles-bom:_"))
@@ -51,6 +53,7 @@ dependencies {
     testImplementation("org.http4k:http4k-connect-amazon-sqs-fake")
     testImplementation("org.http4k:http4k-connect-amazon-dynamodb-fake")
     testImplementation("org.http4k:http4k-connect-amazon-evidently-fake")
+    testImplementation("com.github.fppt:jedis-mock:_")
 }
 
 configurations { // don't want to bundle dependencies in library, but they are needed in tests
