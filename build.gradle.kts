@@ -20,7 +20,6 @@ dependencies {
     compileOnly("io.split.client:java-client:_")
     compileOnly("com.zaxxer:HikariCP:_")
     compileOnly("com.h2database:h2:_")
-    compileOnly("com.michael-bull.kotlin-result:kotlin-result:_")
     compileOnly("com.github.ksuid:ksuid:_")
     compileOnly("com.github.ben-manes.caffeine:caffeine:_")
 
