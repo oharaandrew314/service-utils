@@ -22,6 +22,7 @@ dependencies {
     compileOnly("com.h2database:h2:_")
     compileOnly("com.github.ksuid:ksuid:_")
     compileOnly("com.github.ben-manes.caffeine:caffeine:_")
+    compileOnly("redis.clients:jedis:_")
 
     //forKHandles
     compileOnly(platform("dev.forkhandles:forkhandles-bom:_"))
@@ -50,6 +51,7 @@ dependencies {
     testImplementation("org.http4k:http4k-connect-amazon-sqs-fake")
     testImplementation("org.http4k:http4k-connect-amazon-dynamodb-fake")
     testImplementation("org.http4k:http4k-connect-amazon-evidently-fake")
+    testImplementation("com.github.fppt:jedis-mock:_")
 }
 
 configurations { // don't want to bundle dependencies in library, but they are needed in tests
@@ -68,7 +70,7 @@ mavenPublishing {
     configure(KotlinJvm(sourcesJar = true))
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
     signAllPublications()
-    coordinates("dev.andrewohara", "service-utils", "1.23.0")
+    coordinates("dev.andrewohara", "service-utils", "1.24.0")
 
     pom {
         name.set("Service Utils")
