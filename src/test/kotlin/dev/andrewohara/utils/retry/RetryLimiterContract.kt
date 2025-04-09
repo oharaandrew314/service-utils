@@ -11,7 +11,6 @@ import org.http4k.connect.amazon.dynamodb.FakeDynamoDb
 import org.http4k.connect.amazon.dynamodb.mapper.tableMapper
 import org.http4k.connect.amazon.dynamodb.model.TableName
 import org.http4k.format.Moshi
-import org.http4k.format.MoshiNode
 import org.http4k.lens.BiDiMapping
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
