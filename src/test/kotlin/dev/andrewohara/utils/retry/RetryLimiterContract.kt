@@ -1,5 +1,6 @@
 package dev.andrewohara.utils.retry
 
+import com.github.fppt.jedismock.RedisServer
 import dev.andrewohara.utils.jdk.toClock
 import dev.forkhandles.result4k.Failure
 import dev.forkhandles.result4k.Result4k
@@ -9,8 +10,12 @@ import dev.forkhandles.result4k.kotest.shouldBeSuccess
 import org.http4k.connect.amazon.dynamodb.FakeDynamoDb
 import org.http4k.connect.amazon.dynamodb.mapper.tableMapper
 import org.http4k.connect.amazon.dynamodb.model.TableName
+import org.http4k.format.Moshi
+import org.http4k.format.MoshiNode
 import org.http4k.lens.BiDiMapping
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import redis.clients.jedis.JedisPool
 import java.time.Duration
 import java.time.Instant
 
@@ -19,16 +24,22 @@ private typealias Task = (Int) -> Result4k<Int, Int>
 private val succeed: Task = { Success(it) }
 private val fail: Task = { Failure(it) }
 
-abstract class RetryLimiterContract(storage: RetryStorage<String>) {
+abstract class RetryLimiterContract() {
 
     private val clock = Instant.parse("2025-04-14T12:00:00Z").toClock()
 
-    private val retries = RetryLimiter(
-        storage = storage,
-        clock = clock,
-        intervalFunction = { Duration.ofSeconds(it * 2L) }
-    )
+    abstract fun getStorage(): RetryStorage<String>
 
+    private lateinit var retries: RetryLimiter<String>
+
+    @BeforeEach
+    fun setup() {
+        retries = RetryLimiter(
+            storage = getStorage(),
+            clock = clock,
+            intervalFunction = { Duration.ofSeconds(it * 2L) }
+        )
+    }
 
     @Test
     fun `succeed on first attempt`() {
@@ -93,13 +104,24 @@ abstract class RetryLimiterContract(storage: RetryStorage<String>) {
     }
 }
 
-class DynamoRetryLimiterTest: RetryLimiterContract(
-    DynamoRetryStorage(
+class DynamoRetryLimiterTest: RetryLimiterContract() {
+    override fun getStorage() = DynamoRetryStorage(
         table = FakeDynamoDb().client()
             .tableMapper(TableName.of("retries"), DynamoRetryStorage.schema)
             .also { it.createTable().shouldBeSuccess() },
         idMapper = BiDiMapping(String::toString, String::toString),
     )
-)
+}
 
-class MemoryRetryLimiterTest: RetryLimiterContract(MemoryRetryStorage())
+class MemoryRetryLimiterTest: RetryLimiterContract() {
+    override fun getStorage() = MemoryRetryStorage<String>()
+}
+
+class JedisRetryLimiterTest: RetryLimiterContract() {
+
+    override fun getStorage(): RetryStorage<String> {
+        val fake = RedisServer.newRedisServer().start()
+        val pool = JedisPool(fake.host, fake.bindPort)
+        return JedisRetryStorage(pool, BiDiMapping(String::toString, String::toString), Moshi)
+    }
+}
