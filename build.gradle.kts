@@ -1,4 +1,3 @@
-import com.vanniktech.maven.publish.SonatypeHost
 import com.vanniktech.maven.publish.KotlinJvm
 
 plugins {
@@ -68,7 +67,7 @@ tasks.jacocoTestReport {
 
 mavenPublishing {
     configure(KotlinJvm(sourcesJar = true))
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
+    publishToMavenCentral(automaticRelease = true)
     signAllPublications()
     coordinates("dev.andrewohara", "service-utils", "1.24.0")
 
