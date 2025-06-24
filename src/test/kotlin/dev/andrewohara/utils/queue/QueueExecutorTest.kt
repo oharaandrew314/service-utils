@@ -12,6 +12,7 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.sqs.SqsClient
 import java.lang.IllegalArgumentException
+import java.time.Duration
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -165,5 +166,26 @@ class QueueExecutorTest {
                 failure.throwable shouldBe null
                 failure.message shouldBe "bad"
             }
+    }
+
+    @Test
+    fun `start and stop and start and stop`() {
+        val worker = queue.withWorker(
+            errorHandler = { throw it },
+            taskErrorHandler = { taskErrors += it },
+            task = { completedTasks += it }
+        )
+
+        worker.start(1)
+        worker.isRunning shouldBe true
+
+        worker.stop(Duration.ofSeconds(2))
+        worker.isRunning shouldBe false
+
+        worker.start(2)
+        worker.isRunning shouldBe true
+
+        worker.stop()
+        worker.isRunning shouldBe false
     }
 }
