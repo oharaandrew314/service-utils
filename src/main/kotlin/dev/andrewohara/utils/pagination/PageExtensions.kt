@@ -9,3 +9,8 @@ fun <Item: Any, Cursor: Any> Page<Item, Cursor>.filter(fn: (Item) -> Boolean) = 
     items = items.filter(fn),
     next = next
 )
+
+fun <Item: Any, In: Any, Out: Any> Page<Item, In>.mapCursor(fn: (In) -> Out) = Page(
+    items = items,
+    next = next?.let(fn)
+)

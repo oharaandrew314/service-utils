@@ -14,7 +14,7 @@ import org.http4k.format.AutoMarshalling
 import java.time.Duration
 import kotlin.reflect.KClass
 
-private const val MAX_RECEIVE_COUNT = 10  // SQS has a limit to the number of messages to receive
+private const val MAX_MESSAGES = 10  // SQS-imposed limit to send and receive
 
 inline fun <reified Message: Any> WorkQueue.Companion.http4k(
     sqs: SQS,
@@ -49,7 +49,7 @@ class Http4kConnectWorkQueue<Message: Any>(
     override fun invoke(maxMessages: Int): List<Http4kConnectWorkQueueItem<Message>> {
         val messages = sqs.receiveMessage(
             queueUrl = url,
-            maxNumberOfMessages = maxMessages.coerceAtMost(MAX_RECEIVE_COUNT) ,
+            maxNumberOfMessages = maxMessages.coerceAtMost(MAX_MESSAGES) ,
             waitTimeSeconds = pollWaitTime?.toSeconds()?.toInt()
         ).onFailure { it.reason.throwIt() }
 
@@ -84,18 +84,20 @@ class Http4kConnectWorkQueue<Message: Any>(
     }
 
     override fun plusAssign(messages: Collection<Message>) {
-        sqs.sendMessageBatch(
-            queueUrl = url,
-            entries = messages.mapIndexed { index, message ->
-                SendMessageBatchEntry(
-                    id = index.toString(),
-                    payload = marshaller.asFormatString(message),
-                    delaySeconds = deliveryDelay?.toSeconds()?.toInt(),
-                    messageGroupId = getGroupId(message),
-                    deduplicationId = getDeduplicationId(message)
-                )
-            }
-        ).onFailure { it.reason.throwIt() }
+        for (chunk in messages.chunked(MAX_MESSAGES)) {
+            sqs.sendMessageBatch(
+                queueUrl = url,
+                entries = chunk.mapIndexed { index, message ->
+                    SendMessageBatchEntry(
+                        id = index.toString(),
+                        payload = marshaller.asFormatString(message),
+                        delaySeconds = deliveryDelay?.toSeconds()?.toInt(),
+                        messageGroupId = getGroupId(message),
+                        deduplicationId = getDeduplicationId(message)
+                    )
+                }
+            ).onFailure { it.reason.throwIt() }
+        }
     }
 
     override fun toString() = "${javaClass.simpleName}: $url"
