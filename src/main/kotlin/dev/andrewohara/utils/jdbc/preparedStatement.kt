@@ -46,3 +46,11 @@ fun PreparedStatement.setNullableByteArray(position: Int, value: ByteArray?, jdb
         setNull(position, jdbcType)
     }
 }
+
+fun PreparedStatement.setNullableFloat(position: Int, value: Float?, jdbcType: Int = Types.FLOAT) {
+    if (value != null) {
+        setFloat(position, value)
+    } else {
+        setNull(position, jdbcType)
+    }
+}

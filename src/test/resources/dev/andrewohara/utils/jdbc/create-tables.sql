@@ -3,5 +3,6 @@ CREATE TABLE IF NOT EXISTS cats (
     name VARCHAR,
     lives INT,
     born TIMESTAMP,
-    trills BOOLEAN
+    trills BOOLEAN,
+    weight FLOAT
 )
