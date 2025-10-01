@@ -11,6 +11,8 @@ fun ResultSet.getBoolOrNull(key: String): Boolean? = getBoolean(key).let { if (w
 
 fun ResultSet.getInstantOrNull(key: String): Instant? = getTimestamp(key)?.toInstant()
 
+fun ResultSet.getFloatOrNull(key: String): Float? = getFloat(key).let { if (wasNull()) null else it }
+
 inline fun <reified T: Enum<T>> ResultSet.getEnumOrNull(name: String): T? {
     return getString(name)?.let {
         enumValueOf<T>(it)

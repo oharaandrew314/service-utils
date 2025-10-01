@@ -19,7 +19,8 @@ class JdbcUtilsTest {
         val name: String?,
         val lives: Int?,
         val born: Instant?,
-        val trills: Boolean?
+        val trills: Boolean?,
+        val weight: Float?
     )
 
     private val dataSource = TestDb()
@@ -36,8 +37,8 @@ class JdbcUtilsTest {
 
     @Test
     fun `ResultSet toSequence`() {
-        createCat("Toggles", 1, Instant.parse("2004-06-01T03:33:00Z"), true)
-        createCat("Bandit", 8, Instant.parse("2016-07-01T12:15:00Z"), false)
+        createCat("Toggles", 1, Instant.parse("2004-06-01T03:33:00Z"), true, 4.1f)
+        createCat("Bandit", 8, Instant.parse("2016-07-01T12:15:00Z"), false, 6.2f)
 
         dataSource.connection.use { conn ->
             conn.prepareStatement("SELECT * FROM cats").use { stmt ->
@@ -52,23 +53,24 @@ class JdbcUtilsTest {
 
     @Test
     fun `create empty cat`() {
-        val created = createCat(null, null, null, null)
+        val created = createCat(null, null, null, null, 0.3f)
         getCat(created.id) shouldBe created
     }
 
     @Test
     fun `create cat`() {
-        val created = createCat("Toggles", 1, Instant.parse("2004-06-01T03:33:00Z"), true)
+        val created = createCat("Toggles", 1, Instant.parse("2004-06-01T03:33:00Z"), true, weight = 4.9f)
         getCat(created.id) shouldBe created
     }
 
-    private fun createCat(name: String?, lives: Int?, born: Instant?, trills: Boolean?): Cat {
+    private fun createCat(name: String?, lives: Int?, born: Instant?, trills: Boolean?, weight: Float?): Cat {
         val id = dataSource.connection.use { conn ->
             conn.prepareStatement(createCat, arrayOf("id")).use { stmt ->
                 stmt.setNullableString(1, name)
                 stmt.setNullableInt(2, lives)
                 stmt.setNullableInstant(3, born)
                 stmt.setNullableBoolean(4, trills)
+                stmt.setNullableFloat(5, weight)
 
                 require(stmt.executeUpdate() == 1)
                 stmt.generatedKeys.use { rs ->
@@ -83,7 +85,8 @@ class JdbcUtilsTest {
             name = name,
             lives = lives,
             born = born,
-            trills = trills
+            trills = trills,
+            weight = weight
         )
     }
 
@@ -100,7 +103,8 @@ class JdbcUtilsTest {
                         name = rs.getString("name"),
                         lives = rs.getIntOrNull("lives"),
                         born = rs.getInstantOrNull("born"),
-                        trills = rs.getBoolOrNull("trills")
+                        trills = rs.getBoolOrNull("trills"),
+                        weight = rs.getFloatOrNull("weight")
                     )
                 }
             }
