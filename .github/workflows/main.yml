@@ -7,25 +7,6 @@ on:
     branches: [ master ]
 
 jobs:
-  coverage:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout latest code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: 21
-          distribution: temurin
-
-      - name: Build Coverage
-        run: sh ./gradlew check jacocoTestReport
-
-      - name: Upload Coverage
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
   test:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -49,7 +30,7 @@ jobs:
   publish:
     needs: [ test, coverage ]
     runs-on: ubuntu-latest
-    if: "!contains(github.event.commits[0].message, '[skip ci]')"
+    if: github.event_name == 'release'
     steps:
       - name: Checkout latest code
         uses: actions/checkout@v4

@@ -1,10 +1,7 @@
-import com.vanniktech.maven.publish.KotlinJvm
-
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
     id("com.vanniktech.maven.publish")
-    id("jacoco")
 }
 
 repositories {
@@ -27,19 +24,13 @@ dependencies {
     compileOnly(platform("dev.forkhandles:forkhandles-bom:_"))
     compileOnly("dev.forkhandles:values4k")
     compileOnly("dev.forkhandles:result4k")
-
-    // aws v2
-    compileOnly(platform("software.amazon.awssdk:bom:_"))
-    compileOnly("software.amazon.awssdk:sqs")
-    compileOnly("software.amazon.awssdk:dynamodb-enhanced")
-    compileOnly("software.amazon.awssdk:evidently")
+    compileOnly("dev.forkhandles:time4k")
 
     // http4k
     compileOnly(platform(Http4k.bom))
     compileOnly(Http4k.client.websocket)
     compileOnly("org.http4k:http4k-api-openapi")
     compileOnly("org.http4k:http4k-connect-amazon-sqs")
-    compileOnly("org.http4k:http4k-connect-amazon-evidently")
     compileOnly("org.http4k:http4k-connect-amazon-dynamodb")
 
     testImplementation(kotlin("test"))
@@ -56,43 +47,6 @@ dependencies {
 configurations { // don't want to bundle dependencies in library, but they are needed in tests
     testImplementation.configure {
         extendsFrom(compileOnly.get())
-    }
-}
-
-tasks.jacocoTestReport {
-    reports {
-        xml.required.set(false)
-    }
-}
-
-mavenPublishing {
-    configure(KotlinJvm(sourcesJar = true))
-    publishToMavenCentral(automaticRelease = true)
-    signAllPublications()
-    coordinates("dev.andrewohara", "service-utils", "1.26.0")
-
-    pom {
-        name.set("Service Utils")
-        description.set("Collection of useful kotlin microservice utilities")
-        inceptionYear.set("2021")
-        url.set("https://github.com/oharaandrew314/service-utils")
-        licenses {
-            license {
-                name.set("The Apache License, Version 2.0")
-                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                distribution.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-            }
-        }
-        developers {
-            developer {
-                id.set("oharaandrew314")
-                name.set("Andrew O'Hara")
-                url.set("https://github.com/oharaandrew314")
-            }
-        }
-        scm {
-            url.set("https://github.com/oharaandrew314/service-utils")
-        }
     }
 }
 

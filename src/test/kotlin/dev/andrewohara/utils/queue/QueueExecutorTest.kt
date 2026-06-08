@@ -1,16 +1,15 @@
 package dev.andrewohara.utils.queue
 
+import dev.forkhandles.result4k.kotest.shouldBeSuccess
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import org.http4k.aws.AwsSdkClient
 import org.http4k.connect.amazon.sqs.FakeSQS
+import org.http4k.connect.amazon.sqs.createQueue
+import org.http4k.connect.amazon.sqs.model.QueueName
 import org.http4k.format.Jackson
 import org.junit.jupiter.api.Test
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.services.sqs.SqsClient
 import java.lang.IllegalArgumentException
 import java.time.Duration
 import java.util.concurrent.CountDownLatch
@@ -18,19 +17,12 @@ import java.util.concurrent.TimeUnit
 
 class QueueExecutorTest {
 
-    private val queue = let {
-        val sqs = SqsClient.builder()
-            .httpClient(AwsSdkClient(FakeSQS()))
-            .credentialsProvider { AwsBasicCredentials.create("id", "secret") }
-            .region(Region.CA_CENTRAL_1)
-            .build()
+    private val sqs = FakeSQS()
 
-        val url = sqs.createQueue {
-            it.queueName("test")
-        }.queueUrl()
-
-        WorkQueue.sqsV2<String>(sqs, url, Jackson)
-    }
+    private val queue = sqs.client()
+        .createQueue(QueueName.parse("test"))
+        .shouldBeSuccess()
+        .let { WorkQueue.http4k<String>(sqs.client(), it.QueueUrl, Jackson) }
 
     private val taskErrors = mutableListOf<TaskResult.Failure<String>>()
     private val completedTasks = mutableListOf<String>()

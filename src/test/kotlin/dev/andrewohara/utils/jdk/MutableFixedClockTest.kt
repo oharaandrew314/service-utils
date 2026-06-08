@@ -3,6 +3,7 @@ package dev.andrewohara.utils.jdk
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import java.time.*
+import java.util.concurrent.CompletableFuture
 
 class MutableFixedClockTest {
 
@@ -54,5 +55,34 @@ class MutableFixedClockTest {
 
         time shouldBe Instant.parse("2021-01-01T11:00:00Z")
         testObj.instant() shouldBe Instant.parse("2021-01-01T11:00:00Z")
+    }
+
+    @Test
+    fun subscribe() {
+        val future = CompletableFuture<Instant>()
+
+        testObj.subscribe { time ->
+            future.complete(time)
+        }
+
+        testObj += Duration.ofHours(1)
+
+        future.get() shouldBe testObj.instant()
+    }
+
+    @Test
+    fun unsubscribe() {
+        var counter = 0
+
+        val subscription = testObj.subscribe { counter++ }
+
+        testObj += Duration.ofMinutes(1)
+        testObj += Duration.ofMinutes(1)
+
+        subscription.close()
+
+        testObj += Duration.ofMinutes(1)
+
+        counter shouldBe 2
     }
 }

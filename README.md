@@ -1,5 +1,4 @@
 [comment]: <> ([![codecov]&#40;https://codecov.io/gh/oharaandrew314/service-utils/branch/master/graph/badge.svg&#41;]&#40;https://codecov.io/gh/oharaandrew314/service-utils&#41;)
-[![codecov](https://codecov.io/gh/oharaandrew314/service-utils/branch/master/graph/badge.svg?token=46CD6VVRXS)](https://codecov.io/gh/oharaandrew314/service-utils)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Maven Central Version](https://img.shields.io/maven-central/v/dev.andrewohara/service-utils)](https://central.sonatype.com/artifact/dev.andrewohara/service-utils)
 
@@ -18,5 +17,4 @@ Utilities for my kotlin microservices
 - Kotlinx Serializers for values4k
 - Result4k and Kotlin-Result migration
 - Result4k failIf and recoverIf
-- Feature Flags (Static, Split, Evidently)
 - Cursor-based pagination utils
