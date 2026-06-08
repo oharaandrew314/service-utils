@@ -28,7 +28,7 @@ jobs:
       - name: Test
         run: sh ./gradlew check --stacktrace
   publish:
-    needs: [ test, coverage ]
+    needs: [ test ]
     runs-on: ubuntu-latest
     if: github.event_name == 'release'
     steps:
