@@ -9,7 +9,6 @@ Utilities for my kotlin microservices
 
 ## Utilities
 
-- Config Loader
 - Id Generator
 - Http4k Logging Filters
 - Null-safe JDBC PreparedStatement method
