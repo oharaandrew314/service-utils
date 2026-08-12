@@ -124,10 +124,12 @@ class MemoryRetryLimiterTest: RetryLimiterContract() {
 class JedisRetryLimiterTest: RetryLimiterContract() {
 
     companion object {
-        private val valkey = GenericContainer(DockerImageName.parse("valkey/valkey:alpine3.23")).apply {
-            addExposedPort(6379)
-            waitingFor(HostPortWaitStrategy().forPorts(6379))
-            start()
+        private val valkey  by lazy {
+            GenericContainer(DockerImageName.parse("valkey/valkey:alpine3.23")).apply {
+                addExposedPort(6379)
+                waitingFor(HostPortWaitStrategy().forPorts(6379))
+                start()
+            }
         }
     }
 
