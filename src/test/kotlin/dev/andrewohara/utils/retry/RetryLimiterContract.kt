@@ -1,7 +1,7 @@
 package dev.andrewohara.utils.retry
 
-import com.github.fppt.jedismock.RedisServer
 import dev.andrewohara.utils.jdk.toClock
+import dev.andrewohara.utils.jedis.uri
 import dev.forkhandles.result4k.Failure
 import dev.forkhandles.result4k.Result4k
 import dev.forkhandles.result4k.Success
@@ -10,11 +10,15 @@ import dev.forkhandles.result4k.kotest.shouldBeSuccess
 import org.http4k.connect.amazon.dynamodb.FakeDynamoDb
 import org.http4k.connect.amazon.dynamodb.mapper.tableMapper
 import org.http4k.connect.amazon.dynamodb.model.TableName
+import org.http4k.core.Uri
 import org.http4k.format.Moshi
 import org.http4k.lens.BiDiMapping
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import redis.clients.jedis.JedisPool
+import org.testcontainers.containers.GenericContainer
+import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
+import org.testcontainers.utility.DockerImageName
+import redis.clients.jedis.RedisClient
 import java.time.Duration
 import java.time.Instant
 
@@ -23,7 +27,7 @@ private typealias Task = (Int) -> Result4k<Int, Int>
 private val succeed: Task = { Success(it) }
 private val fail: Task = { Failure(it) }
 
-abstract class RetryLimiterContract() {
+abstract class RetryLimiterContract {
 
     private val clock = Instant.parse("2025-04-14T12:00:00Z").toClock()
 
@@ -119,8 +123,16 @@ class MemoryRetryLimiterTest: RetryLimiterContract() {
 class JedisRetryLimiterTest: RetryLimiterContract() {
 
     override fun getStorage(): RetryStorage<String> {
-        val fake = RedisServer.newRedisServer().start()
-        val pool = JedisPool(fake.host, fake.bindPort)
-        return JedisRetryStorage(pool, BiDiMapping(String::toString, String::toString), Moshi)
+        val valkey = GenericContainer(DockerImageName.parse("valkey/valkey:alpine3.23")).apply {
+            addExposedPort(6379)
+            waitingFor(HostPortWaitStrategy().forPorts(6379))
+            start()
+        }
+
+        val client = RedisClient.builder()
+            .uri(Uri.of("redis://localhost:${valkey.getMappedPort(6379)}"))
+            .build()
+
+        return JedisRetryStorage(client, BiDiMapping(String::toString, String::toString), Moshi)
     }
 }

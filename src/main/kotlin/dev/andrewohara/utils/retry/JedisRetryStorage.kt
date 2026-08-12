@@ -3,23 +3,25 @@ package dev.andrewohara.utils.retry
 import org.http4k.format.Json
 import org.http4k.lens.BiDiMapping
 import java.time.Duration
-import redis.clients.jedis.JedisPool
+import redis.clients.jedis.UnifiedJedis
+import redis.clients.jedis.params.SetParams
 import java.time.Instant
 
 private const val ATTEMPT = "attempts"
 private const val NEXT_ATTEMPT = "nextAttempt"
 
 class JedisRetryStorage<ID: Any, NODE: Any>(
-    private val pool: JedisPool,
+    private val pool: UnifiedJedis,
     private val idMapping: BiDiMapping<ID, String>,
     private val json: Json<NODE>,
     private val retention: Duration = Duration.ofDays(1)
 ): RetryStorage<ID> {
 
     override fun get(id: ID): RetryLimiterData? {
-        val data = pool.resource
-            .use { it.get(idMapping(id)) ?: return null }
-            .let { json.parse(it) }
+        val data = pool
+            .get(idMapping(id))
+            ?.let { json.parse(it) }
+            ?: return null
 
         val props = with(json) {
             fields(data).associate { (key, value) -> key to text(value) }
@@ -40,15 +42,10 @@ class JedisRetryStorage<ID: Any, NODE: Any>(
             compact(element)
         }
 
-        pool.resource.use {
-            it.setex(idMapping(id), retention.toSeconds(), serialized)
-        }
+        pool.set(idMapping(id), serialized, SetParams().ex(retention.toSeconds()))
     }
 
     override fun minusAssign(id: ID) {
-        pool.resource.use {
-            it.del(idMapping(id))
-        }
+        pool.del(idMapping(id))
     }
-
 }
