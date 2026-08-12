@@ -122,16 +122,19 @@ class MemoryRetryLimiterTest: RetryLimiterContract() {
 
 class JedisRetryLimiterTest: RetryLimiterContract() {
 
-    override fun getStorage(): RetryStorage<String> {
-        val valkey = GenericContainer(DockerImageName.parse("valkey/valkey:alpine3.23")).apply {
+    companion object {
+        private val valkey = GenericContainer(DockerImageName.parse("valkey/valkey:alpine3.23")).apply {
             addExposedPort(6379)
             waitingFor(HostPortWaitStrategy().forPorts(6379))
             start()
         }
+    }
 
+    override fun getStorage(): RetryStorage<String> {
         val client = RedisClient.builder()
             .uri(Uri.of("valkey://${valkey.host}:${valkey.getMappedPort(6379)}"))
             .build()
+            .also { it.flushAll() }
 
         return JedisRetryStorage(client, BiDiMapping(String::toString, String::toString), Moshi)
     }
