@@ -3,6 +3,7 @@ package dev.andrewohara.utils.result
 import dev.forkhandles.result4k.Failure
 import dev.forkhandles.result4k.Result
 import dev.forkhandles.result4k.Success
+import dev.forkhandles.result4k.valueOrNull
 
 /**
  * Become a Failure if the condition is met.
@@ -19,3 +20,6 @@ fun <S, E> Result<S, E>.recoverIf(cond: (E) -> Boolean, f: (E) -> S) = when(this
     is Success -> this
     is Failure -> if (cond(reason)) Success(f(reason)) else this
 }
+
+fun <T, E> Result<T, E>.isSuccess(): Boolean = valueOrNull() != null
+fun <S> S.Success() = Success(this)
