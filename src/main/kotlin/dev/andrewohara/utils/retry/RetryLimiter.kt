@@ -10,9 +10,9 @@ class RetryLimiter<ID: Any>(
     private val clock: Clock = Clock.systemUTC(),
     private val intervalFunction: (attempt: Int) -> Duration
 ) {
-    fun <Result: Any> attempt(
+    fun <Result: Any, Failure: Any> attempt(
         id: ID,
-        fn: (attempt: Int) -> Result4k<Result, out Any>
+        fn: (attempt: Int) -> Result4k<Result, Failure>
     ): Result4k<Result, RetryError> {
         val time = clock.instant()
         val data = storage[id]

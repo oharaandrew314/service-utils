@@ -130,7 +130,7 @@ class JedisRetryLimiterTest: RetryLimiterContract() {
         }
 
         val client = RedisClient.builder()
-            .uri(Uri.of("redis://localhost:${valkey.getMappedPort(6379)}"))
+            .uri(Uri.of("valkey://${valkey.host}:${valkey.getMappedPort(6379)}"))
             .build()
 
         return JedisRetryStorage(client, BiDiMapping(String::toString, String::toString), Moshi)
