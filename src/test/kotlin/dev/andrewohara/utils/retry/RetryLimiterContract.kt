@@ -13,6 +13,7 @@ import org.http4k.connect.amazon.dynamodb.model.TableName
 import org.http4k.core.Uri
 import org.http4k.format.Moshi
 import org.http4k.lens.BiDiMapping
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.GenericContainer
@@ -130,12 +131,17 @@ class JedisRetryLimiterTest: RetryLimiterContract() {
         }
     }
 
-    override fun getStorage(): RetryStorage<String> {
-        val client = RedisClient.builder()
-            .uri(Uri.of("valkey://${valkey.host}:${valkey.getMappedPort(6379)}"))
-            .build()
-            .also { it.flushAll() }
+    private val client = RedisClient.builder()
+        .uri(Uri.of("valkey://${valkey.host}:${valkey.getMappedPort(6379)}"))
+        .build()
 
+    @AfterEach
+    fun cleanup() {
+        client.close()
+    }
+
+    override fun getStorage(): RetryStorage<String> {
+        client.flushAll()
         return JedisRetryStorage(client, BiDiMapping(String::toString, String::toString), Moshi)
     }
 }
