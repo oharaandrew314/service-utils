@@ -32,6 +32,7 @@ dependencies {
     compileOnly("org.http4k:http4k-api-openapi")
     compileOnly("org.http4k:http4k-connect-amazon-sqs")
     compileOnly("org.http4k:http4k-connect-amazon-dynamodb")
+    compileOnly("org.http4k:http4k-testing-chaos")
 
     testImplementation(kotlin("test"))
     testImplementation(Http4k.testing.kotest)

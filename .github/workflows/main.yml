@@ -29,6 +29,8 @@ jobs:
 
       - name: Test
         run: sh ./gradlew check --stacktrace
+        env:
+          TESTCONTAINERS_RYUK_DISABLED: true
   publish:
     needs: [ test ]
     runs-on: ubuntu-latest
@@ -45,6 +47,7 @@ jobs:
 
       - name: Publish
         env:
+          TESTCONTAINERS_RYUK_DISABLED: true
           ORG_GRADLE_PROJECT_VERSION_NAME: ${{ github.event.release.tag_name }}
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.central_username }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.central_password }}
