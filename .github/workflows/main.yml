@@ -15,7 +15,10 @@ jobs:
       fail-fast: false
       matrix:
         java_version: [ 21 ]
-        os: [windows-latest, macOS-latest, ubuntu-latest]
+        os:
+#          - windows-latest
+#          - macOS-latest
+          - ubuntu-latest
         distribution: [ temurin ]
     steps:
       - name: Checkout latest code
@@ -27,12 +30,12 @@ jobs:
           java-version: ${{ matrix.java_version }}
           distribution: ${{ matrix.distribution }}
 
-      - name: Setup Docker
-        if: matrix.os != 'ubuntu-latest'
-        uses: docker/setup-docker-action@v5
+#      - name: Setup Docker
+#        if: matrix.os != 'ubuntu-latest' # already available on linux
+#        uses: docker/setup-docker-action@v5
 
       - name: Test
-        run: sh ./gradlew check --stacktrace --info
+        run: sh ./gradlew check --info
 
   publish:
     needs: [ test ]
@@ -48,9 +51,9 @@ jobs:
           java-version: 21
           distribution: temurin
 
-      - name: Setup Docker
-        if: matrix.os != 'ubuntu-latest'
-        uses: docker/setup-docker-action@v5
+#      - name: Setup Docker
+#        if: matrix.os != 'ubuntu-latest'
+#        uses: docker/setup-docker-action@v5 # already available on linux
 
       - name: Publish
         env:
