@@ -11,8 +11,8 @@ import org.http4k.connect.amazon.sqs.sendMessage
 import org.http4k.connect.amazon.sqs.sendMessageBatch
 import org.http4k.core.Uri
 import org.http4k.format.AutoMarshalling
+import org.http4k.lens.BiDiMapping
 import java.time.Duration
-import kotlin.reflect.KClass
 
 private const val MAX_MESSAGES = 10  // SQS-imposed limit to send and receive
 
@@ -27,10 +27,9 @@ inline fun <reified Message: Any> WorkQueue.Companion.http4k(
 ) = Http4kConnectWorkQueue(
     sqs = sqs,
     url = url,
-    marshaller = marshaller,
+    mapping = BiDiMapping(marshaller::asA, marshaller::asFormatString),
     pollWaitTime = pollWaitTime,
     deliveryDelay = deliveryDelay,
-    type = Message::class,
     getGroupId = getGroupId,
     getDeduplicationId = getDeduplicationId
 )
@@ -38,10 +37,9 @@ inline fun <reified Message: Any> WorkQueue.Companion.http4k(
 class Http4kConnectWorkQueue<Message: Any>(
     private val sqs: SQS,
     private val url: Uri,
-    private val marshaller: AutoMarshalling,
+    private val mapping: BiDiMapping<String, Message>,
     private val pollWaitTime: Duration?,
     private val deliveryDelay: Duration?,
-    private val type: KClass<Message>,
     private val getGroupId: (Message) -> String? = { null },
     private val getDeduplicationId: (Message) -> String? = { null }
 ): WorkQueue<Message> {
@@ -57,7 +55,7 @@ class Http4kConnectWorkQueue<Message: Any>(
         return messages.map { message ->
             Http4kConnectWorkQueueItem(
                 messageId = message.messageId,
-                message = marshaller.asA(message.body, type),
+                message = mapping(message.body),
                 receiptHandle = message.receiptHandle
             )
         }
@@ -76,7 +74,7 @@ class Http4kConnectWorkQueue<Message: Any>(
     override fun plusAssign(message: Message) {
         sqs.sendMessage(
             queueUrl = url,
-            payload = marshaller.asFormatString(message),
+            payload = mapping(message),
             delaySeconds = deliveryDelay?.toSeconds()?.toInt(),
             messageGroupId = getGroupId(message),
             deduplicationId = getDeduplicationId(message)
@@ -90,7 +88,7 @@ class Http4kConnectWorkQueue<Message: Any>(
                 entries = chunk.mapIndexed { index, message ->
                     SendMessageBatchEntry(
                         id = index.toString(),
-                        payload = marshaller.asFormatString(message),
+                        payload = mapping(message),
                         delaySeconds = deliveryDelay?.toSeconds()?.toInt(),
                         messageGroupId = getGroupId(message),
                         deduplicationId = getDeduplicationId(message)

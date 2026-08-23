@@ -3,8 +3,6 @@ package dev.andrewohara.utils.queue
 import dev.andrewohara.utils.IdGenerator
 import java.io.Closeable
 import java.time.Duration
-import java.util.concurrent.Executor
-import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
 
