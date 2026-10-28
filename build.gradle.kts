@@ -13,8 +13,6 @@ dependencies {
     compileOnly(kotlin("stdlib"))
     compileOnly("org.slf4j:slf4j-api:_")
     compileOnly(KotlinX.serialization.json)
-    compileOnly("io.split.client:java-client:_")
-    compileOnly("com.zaxxer:HikariCP:_")
     compileOnly("com.h2database:h2:_")
     compileOnly("com.github.ksuid:ksuid:_")
     compileOnly("com.github.ben-manes.caffeine:caffeine:_")

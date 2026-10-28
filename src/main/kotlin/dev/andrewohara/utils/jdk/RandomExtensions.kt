@@ -27,7 +27,7 @@ fun Random.nextBase62(length: Int) = next(length, base62)
 
 fun Random.nextBase36(length: Int) = next(length, base36)
 
-fun Random.nextHex(length: Int, uppercase: Boolean) = next(length, hex)
+fun Random.nextHex(length: Int, uppercase: Boolean = true) = next(length, hex)
     .let { if (uppercase) it else it.lowercase() }
 
 fun Random.nextBytes(length: Int) = ByteArray(length).also(::nextBytes)

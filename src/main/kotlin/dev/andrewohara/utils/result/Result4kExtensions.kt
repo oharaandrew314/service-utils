@@ -1,28 +1,11 @@
 package dev.andrewohara.utils.result
 
-import dev.forkhandles.result4k.Failure
 import dev.forkhandles.result4k.Result
 import dev.forkhandles.result4k.Result4k
 import dev.forkhandles.result4k.Success
 import dev.forkhandles.result4k.flatMap
 import dev.forkhandles.result4k.map
 import dev.forkhandles.result4k.valueOrNull
-
-/**
- * Become a Failure if the condition is met.
- */
-fun <S, E> Result<S, E>.failIf(cond: (S) -> Boolean, f: (S) -> E) = when(this) {
-    is Success -> if (cond(value)) Failure(f(value)) else this
-    is Failure -> this
-}
-
-/**
- * Become a Success if the condition is met.
- */
-fun <S, E> Result<S, E>.recoverIf(cond: (E) -> Boolean, f: (E) -> S) = when(this) {
-    is Success -> this
-    is Failure -> if (cond(reason)) Success(f(reason)) else this
-}
 
 fun <T, E> Result<T, E>.isSuccess(): Boolean = valueOrNull() != null
 fun <S> S.Success() = Success(this)

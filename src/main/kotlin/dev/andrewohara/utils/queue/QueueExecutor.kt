@@ -1,10 +1,12 @@
 package dev.andrewohara.utils.queue
 
-import dev.andrewohara.utils.IdGenerator
+import dev.andrewohara.utils.jdk.nextBase36
 import java.io.Closeable
 import java.time.Duration
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
+import kotlin.random.Random
+import kotlin.random.asJavaRandom
 
 fun <Message> WorkQueue<Message>.withWorker(
     errorHandler: ErrorHandler,
@@ -74,7 +76,7 @@ class QueueExecutor<Message>(
     private val errorHandler: ErrorHandler,
     private val taskErrorHandler: TaskErrorHandler<Message>,
     private val batchTask: BatchTask<Message>,
-    private val name: String = "Executor ${IdGenerator.nextBase36(4)}",
+    private val name: String = "Executor ${Random.asJavaRandom().nextBase36(4)}",
     private val threadFactory: ThreadFactory
 ) {
     operator fun invoke() = try {

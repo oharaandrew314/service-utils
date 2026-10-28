@@ -3,16 +3,22 @@ package dev.andrewohara.utils.jdk
 import java.io.Closeable
 import java.time.*
 
-data class MutableFixedClock(
+open class TestClock(
     private var time: Instant,
-    private val zone: ZoneId = ZoneOffset.UTC
+    private val zone: ZoneId = ZoneOffset.UTC,
+    private val defaultTick: Duration = Duration.ZERO
 ): Clock() {
 
     private val subscriptions = mutableListOf<(Instant) -> Unit>()
 
     override fun getZone() = zone
-    override fun withZone(zone: ZoneId) = copy(zone = zone)
-    override fun instant() = time
+    override fun withZone(zone: ZoneId) = TestClock(time, zone, defaultTick)
+    override fun instant() = time.also { time += defaultTick }
+
+    fun tick(duration: Duration): Instant {
+        time += duration
+        return time
+    }
 
     operator fun plus(duration: Duration): Instant {
         time += duration
@@ -46,4 +52,7 @@ data class MutableFixedClock(
     }
 }
 
-fun Instant.toClock(zone: ZoneId = ZoneOffset.UTC) = MutableFixedClock(this, zone)
+fun Instant.toClock(
+    zone: ZoneId = ZoneOffset.UTC,
+    defaultTick: Duration = Duration.ZERO
+) = TestClock(this, zone, defaultTick)

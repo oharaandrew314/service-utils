@@ -2,17 +2,25 @@ package dev.andrewohara.utils.jdbc
 
 import io.kotest.matchers.sequences.shouldContainExactly
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Instant
+import java.util.UUID
+
+private const val CREATE_CATS = """CREATE TABLE IF NOT EXISTS cats (
+    id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    name VARCHAR,
+    lives INT,
+    born TIMESTAMP,
+    trills BOOLEAN,
+    weight FLOAT
+)"""
+
+private const val INSERT_CAT = """INSERT INTO cats
+    (name, lives, born, trills, weight)
+    VALUES (?, ?, ?, ?, ?)"""
 
 class JdbcUtilsTest {
-
-    companion object {
-        val createCat = JdbcUtilsTest::class.java.getResourceAsStream("create-cat.sql")!!.reader().readText()
-        val getCat = JdbcUtilsTest::class.java.getResourceAsStream("get-cat.sql")!!.reader().readText()
-    }
 
     data class Cat(
         val id: Int,
@@ -23,16 +31,15 @@ class JdbcUtilsTest {
         val weight: Float?
     )
 
-    private val dataSource = TestDb()
+    private val dataSource = H2DataSourceBuilder.memory(UUID.randomUUID().toString())
+        .keepAlive()
+        .build()
 
     @BeforeEach
     fun createTables() {
-        dataSource.executeClassResource("create-tables.sql")
-    }
-
-    @AfterEach
-    fun truncateTables() {
-        dataSource.executeClassResource("truncate-tables.sql")
+        dataSource.connection.use { conn ->
+            conn.createStatement().execute(CREATE_CATS)
+        }
     }
 
     @Test
@@ -65,7 +72,7 @@ class JdbcUtilsTest {
 
     private fun createCat(name: String?, lives: Int?, born: Instant?, trills: Boolean?, weight: Float?): Cat {
         val id = dataSource.connection.use { conn ->
-            conn.prepareStatement(createCat, arrayOf("id")).use { stmt ->
+            conn.prepareStatement(INSERT_CAT, arrayOf("id")).use { stmt ->
                 stmt.setNullableString(1, name)
                 stmt.setNullableInt(2, lives)
                 stmt.setNullableInstant(3, born)
@@ -92,7 +99,7 @@ class JdbcUtilsTest {
 
     private fun getCat(id: Int): Cat? {
         dataSource.connection.use { conn ->
-            conn.prepareStatement(getCat).use { stmt ->
+            conn.prepareStatement("SELECT * from cats where id = ?").use { stmt ->
                 stmt.setInt(1, id)
 
                 stmt.executeQuery().use { rs ->
